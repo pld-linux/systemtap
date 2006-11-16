@@ -4,7 +4,7 @@
 %define	snap	20061111
 Summary:	Instrumentation System
 Name:		systemtap
-Version:	0.1
+Version:	0.5.11
 Release:	0.%{snap}.1
 License:	GPL
 Group:		Base
@@ -34,7 +34,6 @@ cd src
 %install
 rm -rf $RPM_BUILD_ROOT
 cd src
-rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
