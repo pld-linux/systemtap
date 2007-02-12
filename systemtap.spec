@@ -2,7 +2,7 @@
 # - fix --as-needed build
 %define	snap	20061111
 Summary:	Instrumentation System
-Summary(pl):	System oprzyrz±dowania
+Summary(pl.UTF-8):   System oprzyrzÄ…dowania
 Name:		systemtap
 Version:	0.5.11
 Release:	0.%{snap}.1
@@ -25,9 +25,9 @@ SystemTap is an instrumentation system for systems running Linux 2.6.
 Developers can write instrumentation to collect data on the operation
 of the system.
 
-%description -l pl
-SystemTap to system oprzyrz±dowania dla systemów opartych na Linuksie
-2.6. Programi¶ci mog± pisaæ narzêdzia do zbierania danych dotycz±cych
+%description -l pl.UTF-8
+SystemTap to system oprzyrzÄ…dowania dla systemÃ³w opartych na Linuksie
+2.6. ProgramiÅ›ci mogÄ… pisaÄ‡ narzÄ™dzia do zbierania danych dotyczÄ…cych
 operacji w systemie.
 
 %prep
