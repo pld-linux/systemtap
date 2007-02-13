@@ -2,7 +2,7 @@
 # - fix --as-needed build
 %define	snap	20061111
 Summary:	Instrumentation System
-Summary(pl.UTF-8):   System oprzyrządowania
+Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	0.5.11
 Release:	0.%{snap}.1
