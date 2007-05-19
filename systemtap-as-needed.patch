@@ -1,0 +1,72 @@
+diff -Nur systemtap-0.5.11.orig/src/configure.ac systemtap-0.5.11.as-needed/src/configure.ac
+--- systemtap-0.5.11.orig/src/configure.ac	2006-11-09 18:01:31.000000000 +0000
++++ systemtap-0.5.11.as-needed/src/configure.ac	2007-05-19 17:07:35.000000000 +0000
+@@ -45,7 +45,8 @@
+     AC_MSG_ERROR([systemtap cannot find required perfmon libs])])
+   CFLAGS="$CFLAGS -DPERFMON -I$with_perfmon/include"
+   CXXFLAGS="$CXXFLAGS -DPERFMON -I$with_perfmon/include"
+-  LDFLAGS="$LDFLAGS -DPERFMON -L$with_perfmon/lib -lpfm"
++  LDFLAGS="$LDFLAGS -DPERFMON -L$with_perfmon/lib"
++  LIBS="$LIBS -lpfm"
+ fi
+ 
+ build_elfutils=no
+@@ -69,6 +70,7 @@
+ SAVE_LDFLAGS=$LDFLAGS
+ SAVE_CPPFLAGS=$CPPFLAGS
+ 
++MYSQL_LIBS=""
+ AC_PATH_PROG(MYSQL_CONFIG, mysql_config, no)
+ if test "$MYSQL_CONFIG" = "no"; then
+   AC_MSG_NOTICE([*** Cannot find mysql_config executable. Guess MySQL compiling flags.])
+@@ -76,8 +78,10 @@
+   LDFLAGS="-L/usr/lib/mysql $LDFLAGS -L/usr/lib64/mysql"
+ else
+   CPPFLAGS="`mysql_config --cflags` $CPPFLAGS"
+-  LDFLAGS="`mysql_config --libs` $LDFLAGS"
++  MYSQL_LIBS="`mysql_config --libs`"
++#  LIBS="`mysql_config --libs` $LIBS"
+ fi
++AC_SUBST(MYSQL_LIBS)
+ 
+ AC_CHECK_HEADERS(mysql/mysql.h,
+   AC_CHECK_LIB(mysqlclient, mysql_init,
+@@ -91,10 +95,14 @@
+ LDFLAGS=$SAVE_LDFLAGS
+ CPPFLAGS=$SAVE_CPPFLAGS
+ 
++GLIB2_LIBS=""
+ if ! pkg-config --atleast-version 2.0.0 glib-2.0; then
+   AC_MSG_WARN([glib2-devel is required to build lket-b2a.
+   no glib2-devel found, skip building lket-b2a...])
++else
++  GLIB2_LIBS=`pkg-config --libs glib-2.0`
+ fi
++AC_SUBST(GLIB2_LIBS)
+ 
+ if test $build_elfutils = no; then
+   # Need libdwfl-capable recent elfutils from Fedora
+diff -Nur systemtap-0.5.11.orig/src/runtime/lket/b2a/Makefile.am systemtap-0.5.11.as-needed/src/runtime/lket/b2a/Makefile.am
+--- systemtap-0.5.11.orig/src/runtime/lket/b2a/Makefile.am	2006-10-16 08:36:35.000000000 +0000
++++ systemtap-0.5.11.as-needed/src/runtime/lket/b2a/Makefile.am	2007-05-19 17:06:30.000000000 +0000
+@@ -1,17 +1,17 @@
+ bin_PROGRAMS = lket-b2a
+ lket_b2a_SOURCES = lket_b2a.c
+ lket_b2a_DEPENDENCIES = lket_b2a.h
+-lket_b2a_LDFLAGS = `pkg-config --libs glib-2.0`
++lket_b2a_LDADD = @GLIB2_LIBS@
+ lket_b2a_CFLAGS = -O2 -D_GNU_SOURCE -Wall `pkg-config --cflags glib-2.0`
+ 
+ if HAS_MYSQL
+ lket_b2a_CFLAGS += -DHAS_MYSQL
+ if HAS_MYSQL_CONFIG
+-lket_b2a_LDFLAGS += `mysql_config --libs`
++lket_b2a_LDADD += @MYSQL_LIBS@
+ lket_b2a_CFLAGS += `mysql_config --cflags`
+ else
+ lket_b2a_CFLAGS += -I/usr/include/mysql -g -pipe -fsigned-char -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -fno-strict-aliasing
+-lket_b2a_LDFLAGS += -L/usr/lib/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib -lssl -lcrypto
++lket_b2a_LDADD += -L/usr/lib/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib -lssl -lcrypto
+ endif
+ endif
+ 
