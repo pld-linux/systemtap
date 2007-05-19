@@ -10,8 +10,11 @@ Source0:	ftp://sourceware.org/pub/systemtap/snapshots/%{name}-%{snap}.tar.bz2
 # Source0-md5:	fea372489a6db07592846f2be1c386f0
 Patch0:		%{name}-as-needed.patch
 URL:		http://sourceware.org/systemtap/
+BuildRequires:	autoconf
+BuildRequires:	automake
 BuildRequires:	elfutils-devel
 BuildRequires:	glib2-devel
+BuildRequires:	libtool
 BuildRequires:	mysql-devel
 Requires:	gcc
 Requires:	make
