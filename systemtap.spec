@@ -1,5 +1,3 @@
-# TODO:
-# - fix --as-needed build
 %define	snap	20061111
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
@@ -10,6 +8,7 @@ License:	GPL
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/snapshots/%{name}-%{snap}.tar.bz2
 # Source0-md5:	fea372489a6db07592846f2be1c386f0
+Patch0:		%{name}-as-needed.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	elfutils-devel
 BuildRequires:	glib2-devel
@@ -17,8 +16,6 @@ BuildRequires:	mysql-devel
 Requires:	gcc
 Requires:	make
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define		filterout_ld	-Wl,--as-needed
 
 %description
 SystemTap is an instrumentation system for systems running Linux 2.6.
@@ -32,9 +29,14 @@ operacji w systemie.
 
 %prep
 %setup -q -c
+%patch0 -p1
 
 %build
 cd src
+%{__libtoolize}
+%{__aclocal}
+%{__autoconf}
+%{__automake}
 %configure
 %{__make}
 
@@ -52,7 +54,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %defattr(644,root,root,755)
 %doc src/{README,AUTHORS,NEWS,COPYING}
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_bindir}/lket-b2a
+%attr(755,root,root) %{_bindir}/stap
+%attr(755,root,root) %{_bindir}/staprun
 %{_libexecdir}/systemtap
 %{_datadir}/systemtap
 %dir /var/cache/systemtap
