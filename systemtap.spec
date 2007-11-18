@@ -3,7 +3,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	0.5.11
-Release:	0.%{snap}.2
+Release:	0.%{snap}.3
 License:	GPL
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/snapshots/%{name}-%{snap}.tar.bz2
@@ -33,6 +33,8 @@ operacji w systemie.
 %prep
 %setup -q -c
 %patch0 -p1
+
+sed -i -e 's#-Werror##g' src/Makefile.am
 
 %build
 cd src
