@@ -1,14 +1,12 @@
-%define	snap	20061111
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	0.5.11
-Release:	0.%{snap}.3
+Version:	0.9.8
+Release:	0.1
 License:	GPL
 Group:		Base
-Source0:	ftp://sourceware.org/pub/systemtap/snapshots/%{name}-%{snap}.tar.bz2
-# Source0-md5:	fea372489a6db07592846f2be1c386f0
-Patch0:		%{name}-as-needed.patch
+Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
+# Source0-md5:	42128f0d5a92cc23b1565b829fed3b6f
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -31,38 +29,29 @@ SystemTap to system oprzyrządowania dla systemów opartych na Linuksie
 operacji w systemie.
 
 %prep
-%setup -q -c
-%patch0 -p1
-
-sed -i -e 's#-Werror##g' src/Makefile.am
+%setup -q 
 
 %build
-cd src
-%{__libtoolize}
-%{__aclocal}
-%{__autoconf}
-%{__automake}
 %configure
 %{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} -C src install \
+%{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT/var/cache/systemtap
-
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+install -d $RPM_BUILD_ROOT/var/cache/%{name}
 
 %files
 %defattr(644,root,root,755)
-%doc src/{README,AUTHORS,NEWS,COPYING}
-%attr(755,root,root) %{_bindir}/lket-b2a
+%doc {README,AUTHORS,NEWS,COPYING}
+%doc %{_docdir}
 %attr(755,root,root) %{_bindir}/stap
+%attr(755,root,root) %{_bindir}/stap-*
 %attr(755,root,root) %{_bindir}/staprun
-%{_libexecdir}/systemtap
-%{_datadir}/systemtap
-%dir /var/cache/systemtap
+%attr(755,root,root) %{_bindir}/dtrace
+%{_datadir}/%{name}
+%{_libexecdir}/%{name}
+%dir /var/cache/%{name}
 %{_mandir}/man*/*
