@@ -1,3 +1,8 @@
+#
+# TODO: - enable server
+#	- BRs
+#	- more configure options
+#
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
