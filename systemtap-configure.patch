@@ -5,7 +5,7 @@
  fi
  
 +CPPFLAGS="${CPPFLAGS} -I/usr/include/rpm"
-+LIBS="${LIBS} -lrpmdb-4.5"
++LIBS="${LIBS} -lrpmdb"
 +
  dnl This is here mainly to make sure that configure --prefix=... changes
  dnl the config.h files so files depending on it are recompiled
