@@ -7,15 +7,13 @@ License:	GPL
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	c5c9c2087c2aa0459b90e690a5ca95d0
+Patch0:		%{name}-configure.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	elfutils-devel
 BuildRequires:	glib2-devel
-BuildRequires:	libtool
 BuildRequires:	mysql-devel
-Requires:	gcc
-Requires:	make
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -29,10 +27,16 @@ SystemTap to system oprzyrządowania dla systemów opartych na Linuksie
 operacji w systemie.
 
 %prep
-%setup -q 
+%setup -q
+%patch0 -p1
 
 %build
-%configure
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__automake}
+%configure \
+	--disable-silent-rules
 %{__make}
 
 %install
