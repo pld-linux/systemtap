@@ -3,7 +3,7 @@ Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	1.4
 Release:	0.1
-License:	GPL
+License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	c5c9c2087c2aa0459b90e690a5ca95d0
@@ -52,13 +52,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc {README,AUTHORS,NEWS,COPYING}
+%doc AUTHORS HACKING NEWS README*
 %doc %{_docdir}
 %attr(755,root,root) %{_bindir}/stap
-%attr(755,root,root) %{_bindir}/stap-*
+%attr(755,root,root) %{_bindir}/stap-merge
+%attr(755,root,root) %{_bindir}/stap-report
+%attr(755,root,root) %{_bindir}/stapgraph
 %attr(755,root,root) %{_bindir}/staprun
 %attr(755,root,root) %{_bindir}/dtrace
 %{_datadir}/%{name}
 %{_libexecdir}/%{name}
 %dir /var/cache/%{name}
-%{_mandir}/man*/*
+%{_mandir}/man1/*.1*
+%{_mandir}/man3/*.3*
+%{_mandir}/man7/*.7*
+%{_mandir}/man8/*.8*
