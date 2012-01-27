@@ -6,12 +6,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	1.4
+Version:	1.6
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	c5c9c2087c2aa0459b90e690a5ca95d0
+# Source0-md5:	b845ec58bc04cf4cad5c897f67de1308
 Patch0:		%{name}-configure.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf
