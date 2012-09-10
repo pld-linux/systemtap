@@ -1,0 +1,114 @@
+--- systemtap-1.5/configure.ac.rpm5~	2011-05-23 21:21:36.000000000 +0200
++++ systemtap-1.5/configure.ac	2011-09-26 08:22:28.072465175 +0200
+@@ -449,6 +449,19 @@ AC_ARG_WITH([rpm],
+   [AS_HELP_STRING([--with-rpm],
+                   [query rpm database for missing debuginfos])], [], [with_rpm="auto"])
+ if test "$with_rpm" != "no"; then
++  PKG_CHECK_MODULES([RPM], [rpm], [
++      AC_DEFINE_UNQUOTED([HAVE_RPM],1,[Define if RPM backend is available])
++      CPPFLAGS="$RPM_CFLAGS $CPPFLAGS"
++      stap_LIBS="$stap_LIBS $RPM_LIBS"
++   ], [
++      AC_PATH_PROG(RPM_PATH,rpm,none)
++      if test "$RPM_PATH" = "none"; then
++         AC_MSG_ERROR([RPM executable was not found in your system])
++      else
++         AC_DEFINE_UNQUOTED([HAVE_RPM],1,[Define if RPM backend is available])
++      fi
++   ]
++)
+   AC_CHECK_LIB(rpm, rpmtsInitIterator, [
+                     AC_DEFINE([HAVE_LIBRPM],[1],[have librpm])
+                     stap_LIBS="$stap_LIBS -lrpm"
+--- systemtap-1.5/rpm_finder.cxx.rpm5~	2011-05-23 21:21:36.000000000 +0200
++++ systemtap-1.5/rpm_finder.cxx	2011-09-26 08:14:28.829226303 +0200
+@@ -20,21 +20,22 @@ using namespace std;
+ 
+ #ifdef HAVE_LIBRPM
+ 
+-extern "C" {
+-
+-#define _RPM_4_4_COMPAT
+-#include <string.h>
+-#include <rpm/rpmlib.h>
+-#include <rpm/rpmts.h>
+-#include <rpm/rpmdb.h>
+-#include <rpm/header.h>
++#include <cstring>
++#include <tr1/cstdint>
++#include <rpmtypes.h>
++#include <rpmiotypes.h>
++#include <rpmtag.h>
++#include <rpmts.h>
++#include <rpmrc.h>
++#include <rpmdb.h>
++#include <rpmmacro.h>
++#include <rpmio.h>
++#include <rpmcli.h>
+ 
+ #ifndef xfree
+ #define xfree free
+ #endif
+ 
+-}
+-
+ #if ! HAVE_LIBRPMIO && HAVE_NSS
+ extern "C" {
+ #include <nss.h>
+@@ -51,7 +52,7 @@ missing_rpm_enlist (systemtap_session& s
+ {
+   static int rpm_init_done = 0;
+   rpmts ts;
+-  rpmdbMatchIterator mi;
++  rpmmi mi;
+   int count = 0;
+ 
+   if (filename == NULL)
+@@ -90,8 +91,8 @@ missing_rpm_enlist (systemtap_session& s
+ 	  errmsg_t err;
+ 	  size_t rpminfolen = strlen(rpm_type);
+ 	  size_t srcrpmlen = sizeof (".src.rpm") - 1;
+-	  rpmdbMatchIterator mi_rpminfo;
+-	  h = rpmdbNextIterator(mi);
++	  rpmmi mi_rpminfo;
++	  h = rpmmiNext(mi);
+ 	  if (h == NULL)
+ 	    break;
+ 	  /* Verify the kernel file is not already installed.  */
+@@ -138,21 +139,23 @@ missing_rpm_enlist (systemtap_session& s
+ 	  /* s = `-debuginfo-%{version}-%{release}.%{arch}' */
+ 
+ 	  /* RPMDBI_PACKAGES requires keylen == sizeof (int).  */
+-	  /* RPMDBI_LABEL is an interface for NVR-based dbiFindByLabel().  */
+-	  mi_rpminfo = rpmtsInitIterator(ts, (rpmTag)  RPMDBI_LABEL,
++	  /* RPMTAG_NVRA is an interface for NVR-based dbiFindByLabel().  */
++	  mi_rpminfo = rpmtsInitIterator(ts, (rpmTag)  RPMTAG_NVRA,
+ 					      rpminfo, 0);
+ 	  if (mi_rpminfo)
+ 	    {
+-	      rpmdbFreeIterator(mi_rpminfo);
++	      rpmmiFree(mi_rpminfo);
+ 	      count = 0;
+ 	      break;
+ 	    }
+ 	  /* The allocated memory gets utilized below for MISSING_RPM_HASH.  */
+           if(strcmp(rpm_type,"-debuginfo")==0){
++	    char *nvra = rpmExpand("%{___NVRA}", NULL);
+ 	    xfree(rpminfo);
+ 	    rpminfo = headerSprintf(h,
+-		      "%{name}-%{version}-%{release}.%{arch}",
++		      nvra,
+ 		      rpmTagTable, rpmHeaderFormats, &err);
++	    free(nvra);
+ 	  }
+ 	  if (!rpminfo)
+ 	    {
+@@ -176,7 +179,7 @@ missing_rpm_enlist (systemtap_session& s
+ 	  sess.rpms_to_install.insert(rpminfo);
+  	}
+       count++;
+-      rpmdbFreeIterator(mi);
++      rpmmiFree(mi);
+     }
+ 
+   rpmtsFree(ts);

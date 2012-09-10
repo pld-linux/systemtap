@@ -15,6 +15,7 @@ Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar
 # Source0-md5:	5b7ab0ae0efc520f0b19f9dbf11977c9
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
+Patch2:		%{name}-rpm5-support.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -136,6 +137,7 @@ with the optional dtrace-compatibility preprocessor to process related
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 %{__aclocal}
