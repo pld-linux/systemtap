@@ -13,9 +13,11 @@ License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	5b7ab0ae0efc520f0b19f9dbf11977c9
+Source1:	systemtap.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
+Patch3:		%{name}-no-Werror.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -138,12 +140,19 @@ with the optional dtrace-compatibility preprocessor to process related
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 %{__aclocal}
 %{__autoconf}
 %{__autoheader}
 %{__automake}
+cd runtime/staprun
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__automake}
+cd -
 %configure \
 	--disable-silent-rules \
 	--enable-pie \
@@ -154,11 +163,12 @@ with the optional dtrace-compatibility preprocessor to process related
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT{/var/cache/%{name},%{systemdtmpfilesdir}}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT/var/cache/%{name}
+cp -p %{SOURCE1} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
 
 %find_lang %{name}
 
@@ -172,7 +182,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/stap
 %attr(755,root,root) %{_bindir}/stap-merge
 %attr(755,root,root) %{_bindir}/stap-report
-%attr(755,root,root) %{_bindir}/stapgraph
 %attr(755,root,root) %{_bindir}/staprun
 %{_datadir}/%{name}
 %{_libexecdir}/%{name}
