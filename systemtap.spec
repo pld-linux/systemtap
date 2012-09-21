@@ -183,13 +183,15 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/stap-merge
 %attr(755,root,root) %{_bindir}/stap-report
 %attr(755,root,root) %{_bindir}/staprun
+%attr(755,root,root) %{_bindir}/stapsh
 %{_datadir}/%{name}
 %{_libexecdir}/%{name}
 %dir /var/cache/%{name}
-#%{_mandir}/man1/*.1*
-#%{_mandir}/man3/*.3*
-#%{_mandir}/man7/*.7*
-#%{_mandir}/man8/*.8*
+%{_mandir}/man1/stap.1*
+%{_mandir}/man1/stap-merge.1*
+%{_mandir}/man3/*.3*
+%{_mandir}/man7/*.7*
+%{_mandir}/man8/staprun.8*
 
 %files sdt-devel -f %{name}.lang
 %defattr(644,root,root,755)
