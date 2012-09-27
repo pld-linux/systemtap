@@ -8,7 +8,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	1.8
-Release:	0.1
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -27,6 +27,7 @@ BuildRequires:	elfutils-devel
 BuildRequires:	glib2-devel
 BuildRequires:	mysql-devel
 BuildRequires:	nss-devel
+BuildRequires:	rpm-devel
 BuildRequires:	sqlite3-devel
 BuildRequires:	texlive-latex
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -163,12 +164,21 @@ cd -
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/var/cache/%{name},%{systemdtmpfilesdir}}
+install -d $RPM_BUILD_ROOT{/var/cache/%{name},%{systemdtmpfilesdir}} \
+	$RPM_BUILD_ROOT%{_sysconfdir}/{stap-server/conf.d,/sysconfig,logrotate.d,rc.d/init.d} \
+	$RPM_BUILD_ROOT/var/log/stap-server
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 cp -p %{SOURCE1} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
+
+install initscript/systemtap $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
+install initscript/config.systemtap $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/config
+
+install initscript/stap-server $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
+install initscript/config.stap-server $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/stap-server
+install initscript/logrotate.stap-server $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/stap-server
 
 %find_lang %{name}
 
@@ -184,14 +194,33 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/stap-report
 %attr(755,root,root) %{_bindir}/staprun
 %attr(755,root,root) %{_bindir}/stapsh
-%{_datadir}/%{name}
-%{_libexecdir}/%{name}
+%dir %{_datadir}/%{name}
+%{_libexecdir}/%{name}/stapio
+%{_libexecdir}/%{name}/stap-env
+%{_libexecdir}/%{name}/stap-authorize-cert
 %dir /var/cache/%{name}
 %{_mandir}/man1/stap.1*
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man3/*.3*
-%{_mandir}/man7/*.7*
+%{_mandir}/man7/stappaths.7*
 %{_mandir}/man8/staprun.8*
+
+#%files server
+#%defattr(644,root,root,755)
+#%{_bindir}/stap-server
+#%{_libexecdir}/%{name}/stap-serverd
+#%{_libexecdir}/%{name}/stap-start-server
+#%{_libexecdir}/%{name}/stap-stop-server
+#%{_libexecdir}/%{name}/stap-gen-cert
+#%{_libexecdir}/%{name}/stap-sign-module
+#%{_mandir}/man8/stap-server.8*
+#%{_sysconfdir}/rc.d/init.d/stap-server
+#%config(noreplace) %{_sysconfdir}/logrotate.d/stap-server
+#%dir %{_sysconfdir}/stap-server
+#%dir %{_sysconfdir}/stap-server/conf.d
+#%config(noreplace) %{_sysconfdir}/sysconfig/stap-server
+#%dir %attr(755,stap-server,stap-server) /var/log/stap-server
+#%ghost %attr(755,stap-server,stap-server) %{_localstatedir}/run/stap-server
 
 %files sdt-devel -f %{name}.lang
 %defattr(644,root,root,755)
