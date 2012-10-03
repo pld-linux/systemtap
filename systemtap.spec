@@ -8,7 +8,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	1.8
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -195,9 +195,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/staprun
 %attr(755,root,root) %{_bindir}/stapsh
 %dir %{_datadir}/%{name}
-%{_libexecdir}/%{name}/stapio
-%{_libexecdir}/%{name}/stap-env
-%{_libexecdir}/%{name}/stap-authorize-cert
+%dir %{_libdir}/%{name}
+%{_libdir}/%{name}/stapio
+%{_libdir}/%{name}/stap-env
+%{_libdir}/%{name}/stap-authorize-cert
 %dir /var/cache/%{name}
 %{_mandir}/man1/stap.1*
 %{_mandir}/man1/stap-merge.1*
@@ -208,11 +209,11 @@ rm -rf $RPM_BUILD_ROOT
 #%files server
 #%defattr(644,root,root,755)
 #%{_bindir}/stap-server
-#%{_libexecdir}/%{name}/stap-serverd
-#%{_libexecdir}/%{name}/stap-start-server
-#%{_libexecdir}/%{name}/stap-stop-server
-#%{_libexecdir}/%{name}/stap-gen-cert
-#%{_libexecdir}/%{name}/stap-sign-module
+#%{_libdir}/%{name}/stap-serverd
+#%{_libdir}/%{name}/stap-start-server
+#%{_libdir}/%{name}/stap-stop-server
+#%{_libdir}/%{name}/stap-gen-cert
+#%{_libdir}/%{name}/stap-sign-module
 #%{_mandir}/man8/stap-server.8*
 #%{_sysconfdir}/rc.d/init.d/stap-server
 #%config(noreplace) %{_sysconfdir}/logrotate.d/stap-server
