@@ -1,1 +1,1 @@
-d /var/run/stap-server 0755 stap-server stap-server -
+d /var/run/systemtap 0755 root root -

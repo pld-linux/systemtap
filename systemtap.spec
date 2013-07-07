@@ -1,134 +1,194 @@
 #
-# TODO: - enable server
-#	- BRs
-#	- more configure options
+# TODO: crash, dyninst, byteman (see -runtime-java)
 #
-%bcond_with	doc
+# Conditional build:
+%bcond_without	doc		# documentation build
+%bcond_with	publican	# publican guides build (requires functional publican+wkhtmltopdf)
+%bcond_without	java		# Java runtime support
+#
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	1.8
-Release:	2
+Version:	2.2.1
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	5b7ab0ae0efc520f0b19f9dbf11977c9
+# Source0-md5:	5be8b55864c5b1b50fc361991bb9a4dd
 Source1:	systemtap.tmpfiles
+Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
-Patch3:		%{name}-no-Werror.patch
 URL:		http://sourceware.org/systemtap/
-BuildRequires:	autoconf
+BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
-BuildRequires:	xmlto
 BuildRequires:	avahi-devel
-BuildRequires:	elfutils-devel
+BuildRequires:	boost-devel
+BuildRequires:	docbook-dtd412-xml
+BuildRequires:	elfutils-devel >= 0.148
+BuildRequires:	gettext-devel >= 0.17
 BuildRequires:	glib2-devel
+%{?with_java:BuildRequires:	jdk}
+BuildRequires:	libstdc++-devel
 BuildRequires:	mysql-devel
-BuildRequires:	nss-devel
+BuildRequires:	nss-devel >= 3
 BuildRequires:	rpm-devel
-BuildRequires:	sqlite3-devel
+BuildRequires:	sqlite3-devel >= 3
+BuildRequires:	xmlto
+%if %{with doc}
+BuildRequires:	latex2html
+%{?with_publican:BuildRequires:	publican}
+BuildRequires:	texlive-dvips
+BuildRequires:	texlive-fonts-bitstream
+BuildRequires:	texlive-fonts-type1-bitstream
 BuildRequires:	texlive-latex
+%endif
+# let base mean client+local development package
+Requires:	%{name}-client = %{version}-%{release}
+Requires:	%{name}-devel = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 SystemTap is an instrumentation system for systems running Linux 2.6.
 Developers can write instrumentation to collect data on the operation
-of the system.
+of the system. The base systemtap package provides the components
+needed to locally develop and execute systemtap script.
 
 %description -l pl.UTF-8
 SystemTap to system oprzyrządowania dla systemów opartych na Linuksie
 2.6. Programiści mogą pisać narzędzia do zbierania danych dotyczących
-operacji w systemie.
-
-%package server
-Summary:	Instrumentation System Server
-License:	GPL v2+
-Group:		Applications/System
-URL:		http://sourceware.org/systemtap/
-Requires:	/bin/mktemp
-Requires:	systemtap-devel = %{version}-%{release}
-Requires:	unzip
-Requires:	zip
-Requires(post):	/sbin/chkconfig
-Requires(preun):	/sbin/chkconfig
-
-%description server
-This is the remote script compilation server component of systemtap.
-It announces itself to nearby clients with avahi (if available), and
-compiles systemtap scripts to kernel objects on their demand.
-
-
-%package devel
-Summary:	Programmable system-wide instrumentation system - development headers, tools
-License:	GPL v2+
-Group:		Development/Libraries
-URL:		http://sourceware.org/systemtap/
-Requires:	gcc
-Requires:	linux-libc-headers
-Requires:	make
-
-%description devel
-This package contains the components needed to compile a systemtap
-script from source form into executable (.ko) forms. It may be
-installed on a self-contained developer workstation (along with the
-systemtap-client and systemtap-runtime packages), or on a dedicated
-remote server (alongside the systemtap-server package). It includes a
-copy of the standard tapset library and the runtime library C files.
+operacji w systemie. Główny pakiet dostarcza komponenty niezbędne do
+lokalnego tworzenia i wykonywania skryptów systemtap.
 
 %package runtime
 Summary:	Programmable system-wide instrumentation system - runtime
-License:	GPL v2+
-Group:		Base
-URL:		http://sourceware.org/systemtap/
+Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - środowisko uruchomieniowe
+Group:		Applications/System
 
 %description runtime
 SystemTap runtime contains the components needed to execute a
 systemtap script that was already compiled into a module using a local
 or remote systemtap-devel installation.
 
+%description runtime -l pl.UTF-8
+Środowisko uruchomieniowe SystemTap zawiera komponenty niezbędne do
+uruchomienia skryptu systemtap, który został już wkompilowany do
+modułu przy użyciu lokalnej lub zdalnej instalacji systemtap-devel.
+
+%package runtime-java
+Summary:	SystemTap Java runtime support
+Summary(pl.UTF-8):	Obsługa Javy dla środowiska uruchomieniowego SystemTap
+Group:		Libraries
+Requires:	%{name}-runtime = %{version}-%{release}
+# TODO
+Requires:	byteman > 2.0
+
+%description runtime-java
+This package includes support files needed to run systemtap scripts
+that probe Java processes running on the OpenJDK 1.6 and OpenJDK 1.7
+runtimes using Byteman.
+
+%description runtime-java -l pl.UTF-8
+Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
+sondujące procesy Javy działające w środowiskach OpenJDK 1.6 i OpenJDK
+1.7 przy użyciu Bytemana.
+
 %package client
 Summary:	Programmable system-wide instrumentation system - client
-License:	GPL v2+
-Group:		Base
-URL:		http://sourceware.org/systemtap/
+Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - klient
+Group:		Applications/System
+Requires:	%{name}-runtime = %{version}-%{release}
 Requires:	coreutils
 Requires:	grep
 Requires:	openssh-clients
 Requires:	sed
-Requires:	systemtap-runtime = %{version}-%{release}
 Requires:	unzip
 Requires:	zip
 
 %description client
-This package contains/requires the components needed to develop
-systemtap scripts, and compile them using a local systemtap-devel or a
-remote systemtap-server installation, then run them using a local or
-remote systemtap-runtime. It includes script samples and
-documentation, and a copy of the tapset library for reference.
+This package provides the components needed to develop systemtap
+scripts and compile them using a local systemtap-devel or a remote
+systemtap-server installation, then run them using a local or remote
+systemtap-runtime. It includes script samples and documentation, and a
+copy of the tapset library for reference.
 
+%description client -l pl.UTF-8
+Ten pakiet dostarcza komponenty niezbędne do tworzenia skryptów
+systemtap i kompilowania ich przy użyciu lokalnej instalacji
+systemtap-devel lub zdalnej instalacji systemtap-server, a następnie
+uruchamiania ich przy użyciu lokalnej lub zdalnej instalacji
+systemtap-runtime. Zawiera przykłady skryptów oraz dokumentację, a
+także kopię biblioteki tapset.
+
+%package devel
+Summary:	Programmable system-wide instrumentation system - development headers, tools
+Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - pliki nagłówkowe, narzędzia
+Group:		Development/Tools
+Requires:	%{name}-client = %{version}-%{release}
+Requires:	gcc
+Requires:	kernel-module-build
+Requires:	make
+
+%description devel
+This package provides the components needed to compile a systemtap
+script from source form into executable (.ko) forms. It may be
+installed on a self-contained developer workstation (along with the
+systemtap-client and systemtap-runtime packages), or on a dedicated
+remote server (alongside the systemtap-server package). It includes a
+copy of the standard tapset library and the runtime library C files.
+
+%description devel -l pl.UTF-8
+Ten pakiet dostarcza komponenty niezbędne do kompilowania skryptów
+systemtap z postaci źródłowej do wykonywalnej (.ko). Może być
+zainstalowany na samodzielnej stacji roboczej programisty (wraz z
+pakietami systemtap-client i systemtap-runtime) lub dedykowanym
+zdalnym serwerze (wraz z pakietem systemtap-server). Zawiera kopię
+standardowej biblioteki tapset oraz pliki biblioteki uruchomieniowej
+C.
 
 %package initscript
-Summary:	Systemtap Initscripts
-License:	GPL v2+
+Summary:	SystemTap Initscripts
+Summary(pl.UTF-8):	Skrypty startowe SystemTap
 Group:		Base
-URL:		http://sourceware.org/systemtap/
-Requires:	systemtap = %{version}-%{release}
-Requires(post):	/sbin/chkconfig
-Requires(preun):	/sbin/chkconfig
-Requires(preun):	rc-scripts
-Requires(postun):	rc-scripts
+Requires(post,preun):	/sbin/chkconfig
+Requires:	%{name} = %{version}-%{release}
+Requires:	rc-scripts
 
 %description initscript
-Sysvinit scripts to launch selected systemtap scripts at system
+SysVinit scripts to launch selected systemtap scripts at system
 startup.
+
+%description initscript -l pl.UTF-8
+Skrypty SysVinit do uruchamiania wybranych skryptów systemtap w
+trakcie startu systemu.
+
+%package server
+Summary:	Instrumentation System Server
+Summary(pl.UTF-8):	Serwer systemu oprzyrządowania
+Group:		Applications/System
+Requires(post,preun):	/sbin/chkconfig
+Requires:	%{name}-devel = %{version}-%{release}
+Requires:	/bin/mktemp
+Requires:	unzip
+Requires:	zip
+
+%description server
+This is the remote script compilation server component of systemtap.
+It announces itself to nearby clients with avahi (if available), and
+compiles systemtap scripts to kernel objects on their demand.
+
+%description server -l pl.UTF-8
+Ten pakiet zawiera komponent serwera do zdalnej kompilacji skryptów
+systemtap. Rozgłasza się pobliskim klientom przy użyciu avahi (jeśli
+jest dostępny) i na żądanie kompiluje skrypty systemtap do obiektów
+jądra.
 
 %package sdt-devel
 Summary:	Static probe support tools
-License:	GPLv2+ and Public Domain
+Summary(pl.UTF-8):	Narzędzia do obsługi sond statycznych
+License:	GPL v2+ and Public Domain
 Group:		Development/Libraries
-URL:		http://sourceware.org/systemtap/
 
 %description sdt-devel
 This package includes the <sys/sdt.h> header file used for static
@@ -136,49 +196,64 @@ instrumentation compiled into userspace programs and libraries, along
 with the optional dtrace-compatibility preprocessor to process related
 .d files into tracing-macro-laden .h headers.
 
+%description sdt-devel -l pl.UTF-8
+Ten pakiet zawiera plik nagłówkowy <sys/sdt.h> służący do
+wkompilowywania statycznego oprzyrządowania do programów i bibliotek
+przestrzeni użytkownika, wraz z opcjonalnym preprocesorem zgodności z
+dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
+śledzącymi.
+
 %prep
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
-%patch3 -p1
+%endif
 
 %build
 %{__aclocal}
 %{__autoconf}
 %{__autoheader}
 %{__automake}
-cd runtime/staprun
-%{__aclocal}
-%{__autoconf}
-%{__autoheader}
-%{__automake}
-cd -
 %configure \
 	--disable-silent-rules \
+	--enable-docs%{!?with_doc:=no} \
 	--enable-pie \
+	--enable-publican%{!?with_publican:=no} \
+	--enable-server \
 	--enable-sqlite \
-	--%{?with_doc:en}%{!?with_doc:dis}able-docs \
-	--enable-server
+	--with-java=%{?with_java:%{_jvmdir}/java}%{!?with_java:no}
 %{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/var/cache/%{name},%{systemdtmpfilesdir}} \
-	$RPM_BUILD_ROOT%{_sysconfdir}/{stap-server/conf.d,/sysconfig,logrotate.d,rc.d/init.d} \
+install -d $RPM_BUILD_ROOT{/var/{cache,run}/%{name},%{systemdtmpfilesdir},%{systemdunitdir}} \
+	$RPM_BUILD_ROOT{%{_sysconfdir}/stap-server/conf.d,/etc/{sysconfig,logrotate.d,rc.d/init.d}} \
 	$RPM_BUILD_ROOT/var/log/stap-server
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-cp -p %{SOURCE1} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
+cp -p %{SOURCE1} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/systemtap.conf
+cp -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
 
-install initscript/systemtap $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
+# not installed by make
+install stap-prep $RPM_BUILD_ROOT%{_bindir}/stap-prep
+
+install initscript/systemtap $RPM_BUILD_ROOT/etc/rc.d/init.d
 install initscript/config.systemtap $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/config
 
-install initscript/stap-server $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d
-install initscript/config.stap-server $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/stap-server
-install initscript/logrotate.stap-server $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/stap-server
+install initscript/stap-server $RPM_BUILD_ROOT/etc/rc.d/init.d
+install initscript/config.stap-server $RPM_BUILD_ROOT/etc/sysconfig/stap-server
+install initscript/logrotate.stap-server $RPM_BUILD_ROOT/etc/logrotate.d/stap-server
+install stap-server.service $RPM_BUILD_ROOT%{systemdunitdir}
+
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/{conf.d,script.d}
+install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
+install -d $RPM_BUILD_ROOT/var/log/stap-server
+
+%{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
 
 %find_lang %{name}
 
@@ -187,43 +262,89 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS HACKING NEWS README*
-%doc %{_docdir}
-%attr(755,root,root) %{_bindir}/stap
+
+%files runtime -f %{name}.lang
+%defattr(644,root,root,755)
+%doc AUTHORS NEWS README*
 %attr(755,root,root) %{_bindir}/stap-merge
 %attr(755,root,root) %{_bindir}/stap-report
-%attr(755,root,root) %{_bindir}/staprun
 %attr(755,root,root) %{_bindir}/stapsh
-%dir %{_datadir}/%{name}
+# XXX: %attr(4754,root,stapusr) staprun ?
+%attr(755,root,root) %{_bindir}/staprun
 %dir %{_libdir}/%{name}
-%{_libdir}/%{name}/stapio
-%{_libdir}/%{name}/stap-env
-%{_libdir}/%{name}/stap-authorize-cert
-%dir /var/cache/%{name}
-%{_mandir}/man1/stap.1*
+%attr(755,root,root) %{_libdir}/%{name}/stap-authorize-cert
+%attr(755,root,root) %{_libdir}/%{name}/stapio
 %{_mandir}/man1/stap-merge.1*
-%{_mandir}/man3/*.3*
+%{_mandir}/man3/function::*.3stap*
+%{_mandir}/man3/probe::*.3stap*
+%{_mandir}/man3/stapex.3stap*
+%{_mandir}/man3/stapfuncs.3stap*
+%{_mandir}/man3/stapprobes.3stap*
+%{_mandir}/man3/stapvars.3stap*
+%{_mandir}/man3/tapset::*.3stap*
+%{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
+%{_mandir}/man7/warning::debuginfo.7stap*
 %{_mandir}/man8/staprun.8*
 
-#%files server
-#%defattr(644,root,root,755)
-#%{_bindir}/stap-server
-#%{_libdir}/%{name}/stap-serverd
-#%{_libdir}/%{name}/stap-start-server
-#%{_libdir}/%{name}/stap-stop-server
-#%{_libdir}/%{name}/stap-gen-cert
-#%{_libdir}/%{name}/stap-sign-module
-#%{_mandir}/man8/stap-server.8*
-#%{_sysconfdir}/rc.d/init.d/stap-server
-#%config(noreplace) %{_sysconfdir}/logrotate.d/stap-server
-#%dir %{_sysconfdir}/stap-server
-#%dir %{_sysconfdir}/stap-server/conf.d
-#%config(noreplace) %{_sysconfdir}/sysconfig/stap-server
-#%dir %attr(755,stap-server,stap-server) /var/log/stap-server
-#%ghost %attr(755,stap-server,stap-server) %{_localstatedir}/run/stap-server
+%if %{with java}
+%files runtime-java
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/stapbm
+%attr(755,root,root) %{_libdir}/%{name}/libHelperSDT_*.so
+%{_libdir}/%{name}/HelperSDT.jar
+%endif
 
-%files sdt-devel -f %{name}.lang
+%files client
+%defattr(644,root,root,755)
+%doc docs-installed/examples %{?with_docs:docs-installed/{tapsets,langref.pdf,tutorial.pdf}}
+%attr(755,root,root) %{_bindir}/stap
+%attr(755,root,root) %{_bindir}/stap-prep
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/tapset
+%{_mandir}/man1/stap.1*
+%{_mandir}/man1/stap-prep.1*
+
+%files devel
+%defattr(644,root,root,755)
+%{_datadir}/%{name}/runtime
+
+%files initscript
+%defattr(644,root,root,755)
+%doc initscript/README.systemtap
+%attr(754,root,root) /etc/rc.d/init.d/systemtap
+%dir %{_sysconfdir}/systemtap
+%dir %{_sysconfdir}/systemtap/conf.d
+%dir %{_sysconfdir}/systemtap/script.d
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemtap/config
+%{systemdtmpfilesdir}/systemtap.conf
+%dir /var/cache/%{name}
+%dir /var/run/%{name}
+
+%files server
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/stap-server
+%attr(755,root,root) %{_libdir}/%{name}/stap-env
+%attr(755,root,root) %{_libdir}/%{name}/stap-gen-cert
+%attr(755,root,root) %{_libdir}/%{name}/stap-serverd
+%attr(755,root,root) %{_libdir}/%{name}/stap-sign-module
+%attr(755,root,root) %{_libdir}/%{name}/stap-start-server
+%attr(755,root,root) %{_libdir}/%{name}/stap-stop-server
+%dir %{_sysconfdir}/stap-server
+%dir %{_sysconfdir}/stap-server/conf.d
+%attr(754,root,root) /etc/rc.d/init.d/stap-server
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/stap-server
+%config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/stap-server
+%{systemdunitdir}/stap-server.service
+%{systemdtmpfilesdir}/stap-server.conf
+# TODO: create user/group
+#%attr(750,stap-server,stap-server) %dir /var/lib/stap-server
+#%attr(700,stap-server,stap-server) %dir /var/lib/stap-server/.systemtap
+#%attr(755,stap-server,stap-server) %dir /var/log/stap-server
+#%attr(755,stap-server,stap-server) %dir /var/run/stap-server
+%{_mandir}/man8/stap-server.8*
+
+%files sdt-devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/dtrace
 %{_includedir}/sys/sdt.h
