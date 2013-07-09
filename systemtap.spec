@@ -1,11 +1,15 @@
 #
-# TODO: crash, dyninst, byteman (see -runtime-java)
+# TODO: dyninst, byteman (see -runtime-java)
 #
 # Conditional build:
 %bcond_without	doc		# documentation build
 %bcond_with	publican	# publican guides build (requires functional publican+wkhtmltopdf)
+%bcond_without	crash		# crash extension
 %bcond_without	java		# Java runtime support
 #
+%ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
+%undefine	with_crash
+%endif
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
@@ -25,6 +29,7 @@ BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
 BuildRequires:	avahi-devel
 BuildRequires:	boost-devel
+%{?with_crash:BuildRequires:	crash-devel}
 BuildRequires:	docbook-dtd412-xml
 BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.17
@@ -218,6 +223,7 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 %{__automake}
 %configure \
 	--disable-silent-rules \
+	%{?with_crash:--enable-crash} \
 	--enable-docs%{!?with_doc:=no} \
 	--enable-pie \
 	--enable-publican%{!?with_publican:=no} \
@@ -274,6 +280,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/%{name}
 %attr(755,root,root) %{_libdir}/%{name}/stap-authorize-cert
 %attr(755,root,root) %{_libdir}/%{name}/stapio
+%{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man3/function::*.3stap*
 %{_mandir}/man3/probe::*.3stap*
