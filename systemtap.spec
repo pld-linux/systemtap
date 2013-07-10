@@ -1,5 +1,5 @@
 #
-# TODO: dyninst, byteman (see -runtime-java)
+# TODO: dyninst
 #
 # Conditional build:
 %bcond_without	doc		# documentation build
@@ -86,7 +86,6 @@ Summary:	SystemTap Java runtime support
 Summary(pl.UTF-8):	Obsługa Javy dla środowiska uruchomieniowego SystemTap
 Group:		Libraries
 Requires:	%{name}-runtime = %{version}-%{release}
-# TODO
 Requires:	byteman > 2.0
 
 %description runtime-java
