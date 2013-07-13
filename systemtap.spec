@@ -1,14 +1,16 @@
 #
-# TODO: dyninst
-#
 # Conditional build:
 %bcond_without	doc		# documentation build
 %bcond_with	publican	# publican guides build (requires functional publican+wkhtmltopdf)
 %bcond_without	crash		# crash extension
+%bcond_without	dyninst		# dyninst support
 %bcond_without	java		# Java runtime support
 #
 %ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
+%endif
+%ifnarch %{ix86} %{x8664} ppc ppc64
+%undefine	with_dyninst
 %endif
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
@@ -31,10 +33,14 @@ BuildRequires:	avahi-devel
 BuildRequires:	boost-devel
 %{?with_crash:BuildRequires:	crash-devel}
 BuildRequires:	docbook-dtd412-xml
+%{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
 BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.17
 BuildRequires:	glib2-devel
 %{?with_java:BuildRequires:	jdk}
+%if %{with dyninst} || %{with java}
+BuildRequires:	libselinux-devel
+%endif
 BuildRequires:	libstdc++-devel
 BuildRequires:	mysql-devel
 BuildRequires:	nss-devel >= 3
@@ -228,6 +234,7 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 	--enable-publican%{!?with_publican:=no} \
 	--enable-server \
 	--enable-sqlite \
+	--with-dyninst%{!?with_dyninst:=no} \
 	--with-java=%{?with_java:%{_jvmdir}/java}%{!?with_java:no}
 %{__make}
 
@@ -273,6 +280,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS NEWS README*
 %attr(755,root,root) %{_bindir}/stap-merge
 %attr(755,root,root) %{_bindir}/stap-report
+%{?with_dyninst:%attr(755,root,root) %{_bindir}/stapdyn}
 %attr(755,root,root) %{_bindir}/stapsh
 # XXX: %attr(4754,root,stapusr) staprun ?
 %attr(755,root,root) %{_bindir}/staprun
