@@ -15,12 +15,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.2.1
+Version:	2.3
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	5be8b55864c5b1b50fc361991bb9a4dd
+# Source0-md5:	73ba7a181e8d1d91b065f9ffca02acdd
 Source1:	systemtap.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -289,6 +289,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/stapio
 %{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
+%{_mandir}/man1/stap-report.1*
 %{_mandir}/man3/function::*.3stap*
 %{_mandir}/man3/probe::*.3stap*
 %{_mandir}/man3/stapex.3stap*
@@ -299,7 +300,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
 %{_mandir}/man7/warning::debuginfo.7stap*
+%{?with_dyninst:%{_mandir}/man8/stapdyn.8*}
 %{_mandir}/man8/staprun.8*
+%{_mandir}/man8/stapsh.8*
 
 %if %{with java}
 %files runtime-java
