@@ -15,12 +15,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.3
+Version:	2.4
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	73ba7a181e8d1d91b065f9ffca02acdd
+# Source0-md5:	ca39cff33087b3ec549d6fd78c7e8555
 Source1:	systemtap.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -317,10 +317,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc docs-installed/examples %{?with_docs:docs-installed/{tapsets,langref.pdf,tutorial.pdf}}
 %attr(755,root,root) %{_bindir}/stap
 %attr(755,root,root) %{_bindir}/stap-prep
+%attr(755,root,root) %{_bindir}/stapvirt
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/tapset
 %{_mandir}/man1/stap.1*
 %{_mandir}/man1/stap-prep.1*
+%{_mandir}/man1/stapvirt.1*
 
 %files devel
 %defattr(644,root,root,755)
