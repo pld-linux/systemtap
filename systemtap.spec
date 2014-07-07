@@ -15,12 +15,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.4
+Version:	2.5
 Release:	1
 License:	GPL v2+
 Group:		Base
-Source0:	http://sources.redhat.com/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	ca39cff33087b3ec549d6fd78c7e8555
+Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
+# Source0-md5:	a33c6f2ac5d6b77d8d02246685ee5105
 Source1:	systemtap.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -35,13 +35,15 @@ BuildRequires:	boost-devel
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
 BuildRequires:	elfutils-devel >= 0.148
-BuildRequires:	gettext-devel >= 0.17
+BuildRequires:	gettext-devel >= 0.18.2
 BuildRequires:	glib2-devel
 %{?with_java:BuildRequires:	jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
 BuildRequires:	libstdc++-devel
+BuildRequires:	libvirt-devel >= 1.0.2
+BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	rpm-devel
@@ -111,6 +113,7 @@ Group:		Applications/System
 Requires:	%{name}-runtime = %{version}-%{release}
 Requires:	coreutils
 Requires:	grep
+Requires:	libvirt >= 1.0.2
 Requires:	openssh-clients
 Requires:	sed
 Requires:	unzip
@@ -222,6 +225,7 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 %endif
 
 %build
+%{__gettextize}
 %{__aclocal}
 %{__autoconf}
 %{__autoheader}
@@ -303,6 +307,7 @@ rm -rf $RPM_BUILD_ROOT
 %{?with_dyninst:%{_mandir}/man8/stapdyn.8*}
 %{_mandir}/man8/staprun.8*
 %{_mandir}/man8/stapsh.8*
+%{_mandir}/man8/systemtap.8*
 
 %if %{with java}
 %files runtime-java
@@ -330,7 +335,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files initscript
 %defattr(644,root,root,755)
-%doc initscript/README.systemtap
 %attr(754,root,root) /etc/rc.d/init.d/systemtap
 %dir %{_sysconfdir}/systemtap
 %dir %{_sysconfdir}/systemtap/conf.d
