@@ -15,12 +15,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.5
+Version:	2.6
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	a33c6f2ac5d6b77d8d02246685ee5105
+# Source0-md5:	65e6745f0ec103758c711dd1d12fb6bf
 Source1:	systemtap.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -304,6 +304,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
 %{_mandir}/man7/warning::debuginfo.7stap*
+%{_mandir}/man7/warning::symbols.7stap*
 %{?with_dyninst:%{_mandir}/man8/stapdyn.8*}
 %{_mandir}/man8/staprun.8*
 %{_mandir}/man8/stapsh.8*
