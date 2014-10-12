@@ -16,7 +16,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	2.6
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -26,6 +26,7 @@ Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
+Patch3:		%{name}-dtrace-flexibility.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -220,6 +221,7 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch3 -p1
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
 %endif
