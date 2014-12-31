@@ -1,0 +1,26 @@
+--- systemtap-2.6/cache.cxx~	2014-09-05 21:33:21.000000000 +0000
++++ systemtap-2.6/cache.cxx	2014-12-31 20:01:49.768965553 +0000
+@@ -294,7 +294,11 @@
+         {
+           //interval not passed, don't continue
+           if (s.verbose > 1)
++#ifdef __ILP32__
++            clog << _F("Cache cleaning skipped, interval not reached %llu s / %lu s.",
++#else
+             clog << _F("Cache cleaning skipped, interval not reached %lu s / %lu s.",
++#endif
+                        (current_time.tv_sec-sb.st_mtime), cache_clean_interval)  << endl;
+           return;
+         }
+@@ -302,7 +306,11 @@
+         {
+           //interval reached, continue
+           if (s.verbose > 1)
++#ifdef __ILP32__
++            clog << _F("Cleaning cache, interval reached %llu s > %lu s.",
++#else
+             clog << _F("Cleaning cache, interval reached %lu s > %lu s.",
++#endif
+                        (current_time.tv_sec-sb.st_mtime), cache_clean_interval)  << endl;
+         }
+ 

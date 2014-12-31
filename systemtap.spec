@@ -27,6 +27,7 @@ Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
 Patch3:		%{name}-dtrace-flexibility.patch
+Patch4:		format-security.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -222,6 +223,7 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 %patch0 -p1
 %patch1 -p1
 %patch3 -p1
+%patch4 -p1
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
 %endif
