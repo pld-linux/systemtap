@@ -15,18 +15,17 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.6
-Release:	4
+Version:	2.7
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	65e6745f0ec103758c711dd1d12fb6bf
+# Source0-md5:	e0c3c36955323ae59be07a26a9563474
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
-Patch3:		%{name}-dtrace-flexibility.patch
 Patch4:		format-security.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
@@ -222,7 +221,6 @@ dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch3 -p1
 %patch4 -p1
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
@@ -303,13 +301,13 @@ rm -rf $RPM_BUILD_ROOT
 %{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man1/stap-report.1*
-%{_mandir}/man3/function::*.3stap*
-%{_mandir}/man3/probe::*.3stap*
+#%{_mandir}/man3/function::*.3stap*
+#%{_mandir}/man3/probe::*.3stap*
 %{_mandir}/man3/stapex.3stap*
 %{_mandir}/man3/stapfuncs.3stap*
 %{_mandir}/man3/stapprobes.3stap*
 %{_mandir}/man3/stapvars.3stap*
-%{_mandir}/man3/tapset::*.3stap*
+#%{_mandir}/man3/tapset::*.3stap*
 %{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
 %{_mandir}/man7/warning::debuginfo.7stap*
