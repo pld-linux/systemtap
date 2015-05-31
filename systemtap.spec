@@ -5,7 +5,7 @@
 %bcond_without	crash		# crash extension
 %bcond_without	dyninst		# dyninst support
 %bcond_without	java		# Java runtime support
-#
+
 %ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
 %endif
@@ -16,12 +16,12 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	2.6
-Release:	3
+Release:	4
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	65e6745f0ec103758c711dd1d12fb6bf
-Source1:	systemtap.tmpfiles
+Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
@@ -259,19 +259,24 @@ cp -p %{SOURCE1} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/systemtap.conf
 cp -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
 
 # not installed by make
-install stap-prep $RPM_BUILD_ROOT%{_bindir}/stap-prep
+install -p stap-prep $RPM_BUILD_ROOT%{_bindir}/stap-prep
 
-install initscript/systemtap $RPM_BUILD_ROOT/etc/rc.d/init.d
-install initscript/config.systemtap $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/config
+install -p initscript/systemtap $RPM_BUILD_ROOT/etc/rc.d/init.d
+cp -p initscript/config.systemtap $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/config
 
-install initscript/stap-server $RPM_BUILD_ROOT/etc/rc.d/init.d
-install initscript/config.stap-server $RPM_BUILD_ROOT/etc/sysconfig/stap-server
-install initscript/logrotate.stap-server $RPM_BUILD_ROOT/etc/logrotate.d/stap-server
-install stap-server.service $RPM_BUILD_ROOT%{systemdunitdir}
+install -p initscript/stap-server $RPM_BUILD_ROOT/etc/rc.d/init.d
+cp -p initscript/config.stap-server $RPM_BUILD_ROOT/etc/sysconfig/stap-server
+cp -p initscript/logrotate.stap-server $RPM_BUILD_ROOT/etc/logrotate.d/stap-server
+cp -p stap-server.service $RPM_BUILD_ROOT%{systemdunitdir}
 
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/{conf.d,script.d}
 install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
 install -d $RPM_BUILD_ROOT/var/log/stap-server
+
+%if %{with doc}
+install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-client-%{version}
+cp -a docs-installed/examples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-client-%{version}
+%endif
 
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
 
@@ -324,7 +329,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %files client
 %defattr(644,root,root,755)
-%doc docs-installed/examples %{?with_docs:docs-installed/{tapsets,langref.pdf,tutorial.pdf}}
+%if %{with docs}
+%doc docs-installed/{tapsets,langref.pdf,tutorial.pdf}
+%{_examplesdir}/%{name}-client-%{version}
+%endif
 %attr(755,root,root) %{_bindir}/stap
 %attr(755,root,root) %{_bindir}/stap-prep
 %attr(755,root,root) %{_bindir}/stapvirt
