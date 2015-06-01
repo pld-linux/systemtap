@@ -36,6 +36,7 @@ BuildRequires:	boost-devel
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
 BuildRequires:	elfutils-devel >= 0.148
+BuildRequires:	gettext-devel >= 0.18.2
 BuildRequires:	gettext-tools >= 0.18.2
 BuildRequires:	glib2-devel
 %{?with_java:BuildRequires:	jdk}
@@ -47,6 +48,7 @@ BuildRequires:	libvirt-devel >= 1.0.2
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
 BuildRequires:	nss-devel >= 3
+BuildRequires:	pkgconfig
 BuildRequires:	rpm-devel
 BuildRequires:	sqlite3-devel >= 3
 BuildRequires:	xmlto
@@ -57,6 +59,8 @@ BuildRequires:	texlive-dvips
 BuildRequires:	texlive-fonts-bitstream
 BuildRequires:	texlive-fonts-type1-bitstream
 BuildRequires:	texlive-latex
+BuildRequires:	texlive-latex-psnfss
+BuildRequires:	texlive-xetex
 %endif
 # let base mean client+local development package
 Requires:	%{name}-client = %{version}-%{release}
