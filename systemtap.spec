@@ -39,7 +39,10 @@ BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.18.2
 BuildRequires:	gettext-tools >= 0.18.2
 BuildRequires:	glib2-devel
-%{?with_java:BuildRequires:	jdk}
+%if %{with java}
+BuildRequires:	jdk
+BuildRequires:	rpm-javaprov
+%endif
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
@@ -50,6 +53,7 @@ BuildRequires:	mysql-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	pkgconfig
 BuildRequires:	rpm-devel
+BuildRequires:	rpm-pythonprov
 BuildRequires:	sqlite3-devel >= 3
 BuildRequires:	xmlto
 %if %{with doc}
@@ -276,8 +280,8 @@ install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
 install -d $RPM_BUILD_ROOT/var/log/stap-server
 
 %if %{with doc}
-install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-client-%{version}
-cp -a docs-installed/examples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-client-%{version}
+install -d $RPM_BUILD_ROOT%{_examplesdir}
+mv $RPM_BUILD_ROOT{%{_docdir}/%{name}/examples,%{_examplesdir}/%{name}-client-%{version}}
 %endif
 
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
