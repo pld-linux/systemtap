@@ -309,13 +309,15 @@ rm -rf $RPM_BUILD_ROOT
 %{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man1/stap-report.1*
-#%{_mandir}/man3/function::*.3stap*
-#%{_mandir}/man3/probe::*.3stap*
 %{_mandir}/man3/stapex.3stap*
 %{_mandir}/man3/stapfuncs.3stap*
 %{_mandir}/man3/stapprobes.3stap*
 %{_mandir}/man3/stapvars.3stap*
-#%{_mandir}/man3/tapset::*.3stap*
+%if %{with doc}
+%{_mandir}/man3/function::*.3stap*
+%{_mandir}/man3/probe::*.3stap*
+%{_mandir}/man3/tapset::*.3stap*
+%endif
 %{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
 %{_mandir}/man7/warning::debuginfo.7stap*
@@ -335,7 +337,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files client
 %defattr(644,root,root,755)
-%if %{with docs}
+%if %{with doc}
 %doc docs-installed/{tapsets,langref.pdf,tutorial.pdf}
 %{_examplesdir}/%{name}-client-%{version}
 %endif
