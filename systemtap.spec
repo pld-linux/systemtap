@@ -225,6 +225,17 @@ przestrzeni użytkownika, wraz z opcjonalnym preprocesorem zgodności z
 dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 śledzącymi.
 
+%package doc
+Summary:	SystemTap guides and tutorials
+Summary(pl.UTF-8):	Przewodniki i dokumentacja wprowadzająca do SystemTap
+Group:		Documentation
+
+%description doc
+SystemTap guides and tutorials.
+
+%description doc -l pl.UTF-8
+Przewodniki i dokumentacja wprowadzająca do SystemTap.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -394,3 +405,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/sys/sdt.h
 %{_includedir}/sys/sdt-config.h
 %{_mandir}/man1/dtrace.1*
+
+%if %{with publican}
+%files doc
+%defattr(644,root,root,755)
+%doc doc/{langref,tutorial}.pdf doc/beginners/SystemTap_Beginners_Guide.pdf
+%endif
