@@ -15,12 +15,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.7
+Version:	2.9
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	e0c3c36955323ae59be07a26a9563474
+# Source0-md5:	2f3c183966c82ec9d70c1de286b545fc
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -36,8 +36,8 @@ BuildRequires:	boost-devel
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
 BuildRequires:	elfutils-devel >= 0.148
-BuildRequires:	gettext-devel >= 0.18.2
-BuildRequires:	gettext-tools >= 0.18.2
+BuildRequires:	gettext-devel >= 0.19.4
+BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel
 %if %{with java}
 BuildRequires:	jdk
@@ -320,12 +320,14 @@ rm -rf $RPM_BUILD_ROOT
 %{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man1/stap-report.1*
+%{_mandir}/man1/stapref.1*
 %{_mandir}/man3/stapex.3stap*
 %{_mandir}/man3/stapfuncs.3stap*
 %{_mandir}/man3/stapprobes.3stap*
 %{_mandir}/man3/stapvars.3stap*
 %if %{with doc}
 %{_mandir}/man3/function::*.3stap*
+%{_mandir}/man3/macro::*.3stap*
 %{_mandir}/man3/probe::*.3stap*
 %{_mandir}/man3/tapset::*.3stap*
 %endif
