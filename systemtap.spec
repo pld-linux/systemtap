@@ -9,7 +9,7 @@
 %ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
 %endif
-%ifnarch %{ix86} %{x8664} ppc ppc64
+%ifnarch %{ix86} %{x8664} x32 ppc ppc64 aarch64
 %undefine	with_dyninst
 %endif
 Summary:	Instrumentation System
