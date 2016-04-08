@@ -1,7 +1,7 @@
 #
 # Conditional build:
 %bcond_without	doc		# documentation build
-%bcond_with	publican	# publican guides build (requires functional publican+wkhtmltopdf)
+%bcond_with	publican	# publican guides build [as of 3.0 not rebuilt automatically, PDFs are included]
 %bcond_without	crash		# crash extension
 %bcond_without	dyninst		# dyninst support
 %bcond_without	java		# Java runtime support
@@ -15,17 +15,18 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	2.9
+Version:	3.0
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	2f3c183966c82ec9d70c1de286b545fc
+# Source0-md5:	0edc087e748769496ee244acf3b80168
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
+Patch3:		%{name}-no-werror.patch
 Patch4:		format-security.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
@@ -39,10 +40,8 @@ BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel
-%if %{with java}
-BuildRequires:	jdk
-BuildRequires:	rpm-javaprov
-%endif
+BuildRequires:	json-c-devel
+%{?with_java:BuildRequires:	jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
@@ -50,9 +49,12 @@ BuildRequires:	libstdc++-devel
 BuildRequires:	libvirt-devel >= 1.0.2
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
+BuildRequires:	ncurses-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	pkgconfig
+BuildRequires:	readline-devel
 BuildRequires:	rpm-devel
+%{?with_java:BuildRequires:	rpm-javaprov}
 BuildRequires:	rpm-pythonprov
 BuildRequires:	sqlite3-devel >= 3
 BuildRequires:	xmlto
@@ -240,6 +242,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch3 -p1
 %patch4 -p1
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
@@ -256,7 +259,6 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 	%{?with_crash:--enable-crash} \
 	--enable-docs%{!?with_doc:=no} \
 	--enable-pie \
-	--enable-publican%{!?with_publican:=no} \
 	--enable-server \
 	--enable-sqlite \
 	--with-dyninst%{!?with_dyninst:=no} \
@@ -292,7 +294,7 @@ install -d $RPM_BUILD_ROOT/var/log/stap-server
 
 %if %{with doc}
 install -d $RPM_BUILD_ROOT%{_examplesdir}
-mv $RPM_BUILD_ROOT{%{_docdir}/%{name}/examples,%{_examplesdir}/%{name}-client-%{version}}
+%{__mv} $RPM_BUILD_ROOT{%{_docdir}/%{name}/examples,%{_examplesdir}/%{name}-client-%{version}}
 %endif
 
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
@@ -339,6 +341,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/staprun.8*
 %{_mandir}/man8/stapsh.8*
 %{_mandir}/man8/systemtap.8*
+%lang(cs) %{_mandir}/cs/man1/stap-merge.1*
+%lang(cs) %{_mandir}/cs/man1/stap-report.1*
+%lang(cs) %{_mandir}/cs/man1/stapref.1*
+%lang(cs) %{_mandir}/cs/man3/stapex.3stap*
+%lang(cs) %{_mandir}/cs/man3/stapfuncs.3stap*
+%lang(cs) %{_mandir}/cs/man3/stapprobes.3stap*
+%lang(cs) %{_mandir}/cs/man3/stapvars.3stap*
+%lang(cs) %{_mandir}/cs/man7/error::*.7stap*
+%lang(cs) %{_mandir}/cs/man7/stappaths.7*
+%lang(cs) %{_mandir}/cs/man7/warning::debuginfo.7stap*
+%lang(cs) %{_mandir}/cs/man7/warning::symbols.7stap*
+%lang(cs) %{_mandir}/cs/man8/stapsh.8*
+%lang(cs) %{_mandir}/cs/man8/systemtap.8*
 
 %if %{with java}
 %files runtime-java
@@ -350,10 +365,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files client
 %defattr(644,root,root,755)
-%if %{with doc}
-%doc docs-installed/{tapsets,langref.pdf,tutorial.pdf}
-%{_examplesdir}/%{name}-client-%{version}
-%endif
 %attr(755,root,root) %{_bindir}/stap
 %attr(755,root,root) %{_bindir}/stap-prep
 %attr(755,root,root) %{_bindir}/stapvirt
@@ -362,6 +373,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/stap.1*
 %{_mandir}/man1/stap-prep.1*
 %{_mandir}/man1/stapvirt.1*
+%lang(cs) %{_mandir}/cs/man1/stap.1*
+%lang(cs) %{_mandir}/cs/man1/stap-prep.1*
+%lang(cs) %{_mandir}/cs/man1/stapvirt.1*
+%if %{with doc}
+%{_examplesdir}/%{name}-client-%{version}
+%endif
 
 %files devel
 %defattr(644,root,root,755)
@@ -400,6 +417,7 @@ rm -rf $RPM_BUILD_ROOT
 #%attr(755,stap-server,stap-server) %dir /var/log/stap-server
 #%attr(755,stap-server,stap-server) %dir /var/run/stap-server
 %{_mandir}/man8/stap-server.8*
+%lang(cs) %{_mandir}/cs/man8/stap-server.8*
 
 %files sdt-devel
 %defattr(644,root,root,755)
@@ -407,9 +425,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/sys/sdt.h
 %{_includedir}/sys/sdt-config.h
 %{_mandir}/man1/dtrace.1*
+%lang(cs) %{_mandir}/cs/man1/dtrace.1*
 
-%if %{with publican}
+%if %{with doc}
 %files doc
 %defattr(644,root,root,755)
-%doc doc/{langref,tutorial}.pdf doc/beginners/SystemTap_Beginners_Guide.pdf
+%doc doc/{langref,tutorial}.pdf doc/beginners/SystemTap_Beginners_Guide.pdf docs-installed/tapsets.pdf
 %endif
