@@ -16,7 +16,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	3.0
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -45,7 +45,7 @@ BuildRequires:	json-c-devel
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
-BuildRequires:	libstdc++-devel
+BuildRequires:	libstdc++-devel >= 6:4.7
 BuildRequires:	libvirt-devel >= 1.0.2
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
@@ -254,6 +254,8 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %{__autoconf}
 %{__autoheader}
 %{__automake}
+# dyninst requires C++11 mode
+CXXFLAGS="%{rpmcxxflags} -std=c++11"
 %configure \
 	--disable-silent-rules \
 	%{?with_crash:--enable-crash} \
