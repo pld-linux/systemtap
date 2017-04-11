@@ -5,6 +5,8 @@
 %bcond_without	crash		# crash extension
 %bcond_without	dyninst		# dyninst support
 %bcond_without	java		# Java runtime support
+%bcond_without	python2		# Python 2.x runtime support
+%bcond_without	python3		# Python 3.x runtime support
 
 %ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
@@ -15,12 +17,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	3.0
-Release:	3
+Version:	3.1
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	0edc087e748769496ee244acf3b80168
+# Source0-md5:	767b73d340b13a14b2a4f1e1965482d8
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -28,6 +30,7 @@ Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
 Patch3:		%{name}-no-werror.patch
 Patch4:		format-security.patch
+Patch5:		%{name}-dyninst.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -40,23 +43,32 @@ BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel
-BuildRequires:	json-c-devel
+BuildRequires:	json-c-devel >= 0.12
 %{?with_java:BuildRequires:	jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
-BuildRequires:	libstdc++-devel >= 6:4.7
+BuildRequires:	libstdc++-devel >= 6:4.5
 BuildRequires:	libvirt-devel >= 1.0.2
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	pkgconfig
+%if %{with python2}
+BuildRequires:	python-devel >= 1:2.6
+BuildRequires:	python-setuptools
+%endif
+%if %{with python3}
+BuildRequires:	python3-devel >= 1:3.2
+BuildRequires:	python3-setuptools
+%endif
 BuildRequires:	readline-devel
 BuildRequires:	rpm-devel
 %{?with_java:BuildRequires:	rpm-javaprov}
 BuildRequires:	rpm-pythonprov
-BuildRequires:	sqlite3-devel >= 3
+BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	sqlite3-devel >= 3.7
 BuildRequires:	xmlto
 %if %{with doc}
 BuildRequires:	latex2html
@@ -89,6 +101,7 @@ lokalnego tworzenia i wykonywania skryptów systemtap.
 Summary:	Programmable system-wide instrumentation system - runtime
 Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - środowisko uruchomieniowe
 Group:		Applications/System
+Requires:	json-c >= 0.12
 
 %description runtime
 SystemTap runtime contains the components needed to execute a
@@ -114,8 +127,38 @@ runtimes using Byteman.
 
 %description runtime-java -l pl.UTF-8
 Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
-sondujące procesy Javy działające w środowiskach OpenJDK 1.6 i OpenJDK
-1.7 przy użyciu Bytemana.
+sondujących procesy Javy działające w środowiskach OpenJDK 1.6 i
+OpenJDK 1.7 przy użyciu Bytemana.
+
+%package runtime-python2
+Summary:	SystemTap Python 2 Runtime Support
+Summary(pl.UTF-8):	Obsługa Pythona 2 dla środowiska uruchomieniowego SystemTap
+Group:		Development/Tools
+Requires:	%{name}-runtime = %{version}-%{release}
+Requires:	python-modules >= 1:2.6
+
+%description runtime-python2
+This package includes support files needed to run systemtap scripts
+that probe Python 2 processes.
+
+%description runtime-python2 -l pl.UTF-8
+Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
+sondujących procesy Pythona 2.
+
+%package runtime-python3
+Summary:	SystemTap Python 3 Runtime Support
+Summary(pl.UTF-8):	Obsługa Pythona 3 dla środowiska uruchomieniowego SystemTap
+Group:		Development/Tools
+Requires:	%{name}-runtime = %{version}-%{release}
+Requires:	python3-modules >= 1:3.2
+
+%description runtime-python3
+This package includes support files needed to run systemtap scripts
+that probe Python 3 processes.
+
+%description runtime-python3 -l pl.UTF-8
+Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
+sondujących procesy Pythona 3.
 
 %package client
 Summary:	Programmable system-wide instrumentation system - client
@@ -244,6 +287,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %patch1 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
 %endif
@@ -254,8 +298,6 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %{__autoconf}
 %{__autoheader}
 %{__automake}
-# dyninst requires C++11 mode
-CXXFLAGS="%{rpmcxxflags} -std=c++11"
 %configure \
 	--disable-silent-rules \
 	%{?with_crash:--enable-crash} \
@@ -294,12 +336,11 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/{conf.d,script.d}
 install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
 install -d $RPM_BUILD_ROOT/var/log/stap-server
 
-%if %{with doc}
-install -d $RPM_BUILD_ROOT%{_examplesdir}
-%{__mv} $RPM_BUILD_ROOT{%{_docdir}/%{name}/examples,%{_examplesdir}/%{name}-client-%{version}}
-%endif
-
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
+
+%if %{with python2}
+%py_postclean
+%endif
 
 %find_lang %{name}
 
@@ -365,12 +406,32 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/HelperSDT.jar
 %endif
 
+%if %{with python2}
+%files runtime-python2
+%defattr(644,root,root,755)
+%dir %{py_sitedir}/HelperSDT
+%attr(755,root,root) %{py_sitedir}/HelperSDT/_HelperSDT.so
+%{py_sitedir}/HelperSDT/*.py[co]
+%{py_sitedir}/HelperSDT-0.1.0-py*.egg-info
+%endif
+
+%if %{with python3}
+%files runtime-python3
+%defattr(644,root,root,755)
+%dir %{py3_sitedir}/HelperSDT
+%attr(755,root,root) %{py3_sitedir}/HelperSDT/_HelperSDT.cpython-*.so
+%{py3_sitedir}/HelperSDT/*.py
+%{py3_sitedir}/HelperSDT/__pycache__
+%{py3_sitedir}/HelperSDT-0.1.0-py*.egg-info
+%endif
+
 %files client
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/stap
 %attr(755,root,root) %{_bindir}/stap-prep
 %attr(755,root,root) %{_bindir}/stapvirt
 %dir %{_datadir}/%{name}
+%{_datadir}/%{name}/examples
 %{_datadir}/%{name}/tapset
 %{_mandir}/man1/stap.1*
 %{_mandir}/man1/stap-prep.1*
@@ -378,13 +439,15 @@ rm -rf $RPM_BUILD_ROOT
 %lang(cs) %{_mandir}/cs/man1/stap.1*
 %lang(cs) %{_mandir}/cs/man1/stap-prep.1*
 %lang(cs) %{_mandir}/cs/man1/stapvirt.1*
-%if %{with doc}
-%{_examplesdir}/%{name}-client-%{version}
-%endif
 
 %files devel
 %defattr(644,root,root,755)
 %{_datadir}/%{name}/runtime
+%if %{with python2} || %{with python3}
+%dir %{_libexecdir}/systemtap
+%dir %{_libexecdir}/systemtap/python
+%attr(755,root,root) %{_libexecdir}/systemtap/python/stap-resolve-module-function.py
+%endif
 
 %files initscript
 %defattr(644,root,root,755)

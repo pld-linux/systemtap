@@ -1,0 +1,29 @@
+--- systemtap-3.1/stapdyn/dynsdt.cxx.orig	2017-02-17 18:37:01.000000000 +0100
++++ systemtap-3.1/stapdyn/dynsdt.cxx	2017-04-11 20:34:37.723802317 +0200
+@@ -264,7 +264,7 @@
+   if (points.empty())
+     {
+       warnx("couldn't find %s:%s at %#" PRIx64 " -> %#lx",
+-            p.provider.c_str(), p.name.c_str(), p.pc_offset, address);
++            p.provider.c_str(), p.name.c_str(), p.pc_offset, (unsigned long)address);
+       return;
+     }
+ 
+@@ -290,7 +290,7 @@
+   BPatch_funcCallExpr printfCall(*(printfFuncs[0]), printfArgs);
+ 
+   warnx("inserting %s:%s at %#" PRIx64 " -> %#lx [%zu]",
+-        p.provider.c_str(), p.name.c_str(), p.pc_offset, address, points.size());
++        p.provider.c_str(), p.name.c_str(), p.pc_offset, (unsigned long)address, points.size());
+   process->insertSnippet(printfCall, points);
+ 
+   if (p.sem_offset)
+@@ -302,7 +302,7 @@
+       else
+         {
+           warnx("incrementing semaphore for %s:%s at %#" PRIx64 " -> %#lx",
+-                p.provider.c_str(), p.name.c_str(), p.sem_offset, sem_address);
++                p.provider.c_str(), p.name.c_str(), p.sem_offset, (unsigned long)sem_address);
+ 
+           BPatch_type *sem_type = image->findType("unsigned short");
+           BPatch_variableExpr *semaphore =
