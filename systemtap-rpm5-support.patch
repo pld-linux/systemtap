@@ -1,6 +1,7 @@
---- systemtap-1.5/configure.ac.rpm5~	2011-05-23 21:21:36.000000000 +0200
-+++ systemtap-1.5/configure.ac	2011-09-26 08:22:28.072465175 +0200
-@@ -449,6 +449,19 @@ AC_ARG_WITH([rpm],
+diff -dur systemtap-3.2.orig/configure.ac systemtap-3.2/configure.ac
+--- systemtap-3.2.orig/configure.ac	2017-11-13 10:02:17.000000000 +0100
++++ systemtap-3.2/configure.ac	2017-11-13 10:16:52.000000000 +0100
+@@ -465,6 +465,19 @@
    [AS_HELP_STRING([--with-rpm],
                    [query rpm database for missing debuginfos])], [], [with_rpm="auto"])
  if test "$with_rpm" != "no"; then
@@ -19,16 +20,16 @@
 +)
    AC_CHECK_LIB(rpm, rpmtsInitIterator, [
                      AC_DEFINE([HAVE_LIBRPM],[1],[have librpm])
-                     stap_LIBS="$stap_LIBS -lrpm"
---- systemtap-1.5/rpm_finder.cxx.rpm5~	2011-05-23 21:21:36.000000000 +0200
-+++ systemtap-1.5/rpm_finder.cxx	2011-09-26 08:14:28.829226303 +0200
-@@ -20,21 +20,22 @@ using namespace std;
+                     stap_LIBS="$stap_LIBS -lc -lrpm"
+diff -dur systemtap-3.2.orig/rpm_finder.cxx systemtap-3.2/rpm_finder.cxx
+--- systemtap-3.2.orig/rpm_finder.cxx	2017-10-18 19:59:37.000000000 +0200
++++ systemtap-3.2/rpm_finder.cxx	2017-11-13 10:16:28.000000000 +0100
+@@ -20,20 +20,22 @@
  
  #ifdef HAVE_LIBRPM
  
 -extern "C" {
 -
--#define _RPM_4_4_COMPAT
 -#include <string.h>
 -#include <rpm/rpmlib.h>
 -#include <rpm/rpmts.h>
@@ -55,7 +56,7 @@
  #if ! HAVE_LIBRPMIO && HAVE_NSS
  extern "C" {
  #include <nss.h>
-@@ -51,7 +52,7 @@ missing_rpm_enlist (systemtap_session& s
+@@ -50,7 +52,7 @@
  {
    static int rpm_init_done = 0;
    rpmts ts;
@@ -64,7 +65,7 @@
    int count = 0;
  
    if (filename == NULL)
-@@ -90,8 +91,8 @@ missing_rpm_enlist (systemtap_session& s
+@@ -93,13 +95,15 @@
  	  errmsg_t err;
  	  size_t rpminfolen = strlen(rpm_type);
  	  size_t srcrpmlen = sizeof (".src.rpm") - 1;
@@ -75,7 +76,15 @@
  	  if (h == NULL)
  	    break;
  	  /* Verify the kernel file is not already installed.  */
-@@ -138,21 +139,23 @@ missing_rpm_enlist (systemtap_session& s
+ 
+-	  rpminfo = headerFormat(h, header, &err);
++          char *nvra = rpmExpand("%{___NVRA}", NULL);
++	  rpminfo = headerSprintf(h, header, rpmTagTable, rpmHeaderFormats, &err);
++	  free(nvra);
+ 
+ 	  if (!rpminfo)
+ 	    {
+@@ -140,20 +144,21 @@
  	  /* s = `-debuginfo-%{version}-%{release}.%{arch}' */
  
  	  /* RPMDBI_PACKAGES requires keylen == sizeof (int).  */
@@ -95,15 +104,14 @@
            if(strcmp(rpm_type,"-debuginfo")==0){
 +	    char *nvra = rpmExpand("%{___NVRA}", NULL);
  	    xfree(rpminfo);
- 	    rpminfo = headerSprintf(h,
--		      "%{name}-%{version}-%{release}.%{arch}",
-+		      nvra,
- 		      rpmTagTable, rpmHeaderFormats, &err);
+-	    rpminfo = headerFormat(h, "%{name}-%{version}-%{release}.%{arch}",
+-				   &err);
++	    rpminfo = headerSprintf(h, nvra, rpmTagTable, rpmHeaderFormats, &err);
 +	    free(nvra);
  	  }
  	  if (!rpminfo)
  	    {
-@@ -176,7 +179,7 @@ missing_rpm_enlist (systemtap_session& s
+@@ -177,7 +182,7 @@
  	  sess.rpms_to_install.insert(rpminfo);
   	}
        count++;

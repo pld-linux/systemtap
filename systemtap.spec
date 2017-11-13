@@ -17,12 +17,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	3.1
+Version:	3.2
 Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	767b73d340b13a14b2a4f1e1965482d8
+# Source0-md5:	457147cde312eab7ff8cb49add93f4b4
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -288,6 +288,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
 %endif
@@ -355,6 +356,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc AUTHORS NEWS README*
 %attr(755,root,root) %{_bindir}/stap-merge
 %attr(755,root,root) %{_bindir}/stap-report
+%attr(755,root,root) %{_bindir}/stapbpf
 %{?with_dyninst:%attr(755,root,root) %{_bindir}/stapdyn}
 %attr(755,root,root) %{_bindir}/stapsh
 # XXX: %attr(4754,root,stapusr) staprun ?
@@ -380,6 +382,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man7/stappaths.7*
 %{_mandir}/man7/warning::debuginfo.7stap*
 %{_mandir}/man7/warning::symbols.7stap*
+%{_mandir}/man8/stapbpf.8*
 %{?with_dyninst:%{_mandir}/man8/stapdyn.8*}
 %{_mandir}/man8/staprun.8*
 %{_mandir}/man8/stapsh.8*
