@@ -18,7 +18,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	3.2
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -362,8 +362,8 @@ rm -rf $RPM_BUILD_ROOT
 # XXX: %attr(4754,root,stapusr) staprun ?
 %attr(755,root,root) %{_bindir}/staprun
 %dir %{_libdir}/%{name}
-%attr(755,root,root) %{_libdir}/%{name}/stap-authorize-cert
-%attr(755,root,root) %{_libdir}/%{name}/stapio
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-authorize-cert
+%attr(755,root,root) %{_libexecdir}/%{name}/stapio
 %{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man1/stap-report.1*
@@ -404,9 +404,9 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with java}
 %files runtime-java
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/%{name}/stapbm
-%attr(755,root,root) %{_libdir}/%{name}/libHelperSDT_*.so
-%{_libdir}/%{name}/HelperSDT.jar
+%attr(755,root,root) %{_libexecdir}/%{name}/stapbm
+%attr(755,root,root) %{_libexecdir}/%{name}/libHelperSDT_*.so
+%{_libexecdir}/%{name}/HelperSDT.jar
 %endif
 
 %if %{with python2}
@@ -466,12 +466,12 @@ rm -rf $RPM_BUILD_ROOT
 %files server
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/stap-server
-%attr(755,root,root) %{_libdir}/%{name}/stap-env
-%attr(755,root,root) %{_libdir}/%{name}/stap-gen-cert
-%attr(755,root,root) %{_libdir}/%{name}/stap-serverd
-%attr(755,root,root) %{_libdir}/%{name}/stap-sign-module
-%attr(755,root,root) %{_libdir}/%{name}/stap-start-server
-%attr(755,root,root) %{_libdir}/%{name}/stap-stop-server
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-env
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-gen-cert
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-serverd
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-sign-module
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-start-server
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-stop-server
 %dir %{_sysconfdir}/stap-server
 %dir %{_sysconfdir}/stap-server/conf.d
 %attr(754,root,root) /etc/rc.d/init.d/stap-server
