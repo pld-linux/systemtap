@@ -8,7 +8,7 @@
 %bcond_without	python2		# Python 2.x runtime support
 %bcond_without	python3		# Python 3.x runtime support
 
-%ifnarch %{ix86} %{x8664} alpha arm ia64 ppc64 s390 s390x
+%ifnarch %{ix86} %{x8664} x32 alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
 %endif
 %ifnarch %{ix86} %{x8664} x32 ppc ppc64 aarch64
@@ -361,10 +361,13 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/stapsh
 # XXX: %attr(4754,root,stapusr) staprun ?
 %attr(755,root,root) %{_bindir}/staprun
-%dir %{_libdir}/%{name}
+%dir %{_libexecdir}/%{name}
 %attr(755,root,root) %{_libexecdir}/%{name}/stap-authorize-cert
 %attr(755,root,root) %{_libexecdir}/%{name}/stapio
-%{?with_crash:%attr(755,root,root) %{_libdir}/%{name}/staplog.so}
+%if %{with crash}
+%dir %{_libdir}/%{name}
+%attr(755,root,root) %{_libdir}/%{name}/staplog.so
+%endif
 %{_mandir}/man1/stap-merge.1*
 %{_mandir}/man1/stap-report.1*
 %{_mandir}/man1/stapref.1*
