@@ -17,12 +17,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	3.2
-Release:	4
+Version:	3.3
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	457147cde312eab7ff8cb49add93f4b4
+# Source0-md5:	7f80117649a9eb663781b5372e8a4f96
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-configure.patch
@@ -42,7 +42,7 @@ BuildRequires:	docbook-dtd412-xml
 BuildRequires:	elfutils-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
-BuildRequires:	glib2-devel
+BuildRequires:	glib2-devel >= 2.0
 BuildRequires:	json-c-devel >= 0.12
 %{?with_java:BuildRequires:	jdk}
 %if %{with dyninst} || %{with java}
@@ -365,7 +365,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libexecdir}/%{name}/stap-authorize-cert
 %attr(755,root,root) %{_libexecdir}/%{name}/stapio
 %if %{with crash}
+%if "%{_libdir}" != "%{_libexecdir}"
 %dir %{_libdir}/%{name}
+%endif
 %attr(755,root,root) %{_libdir}/%{name}/staplog.so
 %endif
 %{_mandir}/man1/stap-merge.1*
@@ -450,8 +452,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_datadir}/%{name}/runtime
 %if %{with python2} || %{with python3}
-%dir %{_libexecdir}/systemtap
-%dir %{_libexecdir}/systemtap/python
+%dir %{_libexecdir}/%{name}
+%dir %{_libexecdir}/%{name}/python
 %attr(755,root,root) %{_libexecdir}/systemtap/python/stap-resolve-module-function.py
 %endif
 
