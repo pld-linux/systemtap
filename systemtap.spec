@@ -18,7 +18,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	3.3
-Release:	4
+Release:	5
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -292,6 +292,12 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %if "%{_rpmversion}" >= "5.0"
 %patch2 -p1
 %endif
+
+%{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
+      testsuite/systemtap.examples/general/pyexample.py
+
+find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
+      %{__sed} -E -i -e '1s,#!\s*/usr/bin/env\s+stap(\s|$),#!%{_bindir}/stap\1,'
 
 %build
 %{__gettextize}
