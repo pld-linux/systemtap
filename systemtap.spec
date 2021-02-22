@@ -26,7 +26,6 @@ Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	7f80117649a9eb663781b5372e8a4f96
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
-Patch0:		%{name}-configure.patch
 Patch1:		%{name}-build.patch
 Patch2:		%{name}-rpm5-support.patch
 Patch3:		%{name}-no-werror.patch
@@ -284,7 +283,6 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 
 %prep
 %setup -q
-%patch0 -p1
 %patch1 -p1
 %{?with_rpm5:%patch2 -p1}
 %patch3 -p1
@@ -299,7 +297,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 
 %build
 %{__gettextize}
-%{__aclocal}
+%{__aclocal} -I m4
 %{__autoconf}
 %{__autoheader}
 %{__automake}

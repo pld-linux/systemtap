@@ -14,7 +14,7 @@
 --- systemtap-3.0/Makefile.am.orig	2016-04-05 20:44:51.275502703 +0200
 +++ systemtap-3.0/Makefile.am	2016-04-05 20:51:00.125487222 +0200
 @@ -14,8 +14,8 @@
- 	      -DLOCALEDIR='"$(localedir)"' \
+               -DPY3EXECDIR='"$(py3execdir)"' \
  	      -I$(srcdir)/includes -I$(builddir)/includes/sys
  
 -AM_CFLAGS = -D_GNU_SOURCE -fexceptions -Wall -Wextra -Werror -Wunused -Wformat=2 -W

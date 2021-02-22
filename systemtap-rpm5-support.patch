@@ -21,6 +21,16 @@ diff -dur systemtap-3.2.orig/configure.ac systemtap-3.2/configure.ac
    AC_CHECK_LIB(rpm, rpmtsInitIterator, [
                      AC_DEFINE([HAVE_LIBRPM],[1],[have librpm])
                      stap_LIBS="$stap_LIBS -lc -lrpm"
+@@ -548,6 +548,9 @@
+   AC_CHECK_HEADERS([elfutils/version.h])
+ fi
+ 
++CPPFLAGS="${CPPFLAGS} -I/usr/include/rpm"
++LIBS="${LIBS} -lrpmdb"
++
+ dnl This is here mainly to make sure that configure --prefix=... changes
+ dnl the config.h files so files depending on it are recompiled
+ dnl prefix is passed through indirectly in the Makefile.am AM_CPPFLAGS.
 diff -dur systemtap-3.2.orig/rpm_finder.cxx systemtap-3.2/rpm_finder.cxx
 --- systemtap-3.2.orig/rpm_finder.cxx	2017-10-18 19:59:37.000000000 +0200
 +++ systemtap-3.2/rpm_finder.cxx	2017-11-13 10:16:28.000000000 +0100
