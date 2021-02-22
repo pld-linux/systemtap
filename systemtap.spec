@@ -7,6 +7,7 @@
 %bcond_without	java		# Java runtime support
 %bcond_without	python2		# Python 2.x runtime support
 %bcond_without	python3		# Python 3.x runtime support
+%bcond_with	rpm5	# build with rpm5
 
 %ifnarch %{ix86} %{x8664} x32 alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
@@ -18,7 +19,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	3.3
-Release:	5
+Release:	6
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
@@ -285,13 +286,10 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%{?with_rpm5:%patch2 -p1}
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-
-%if "%{_rpmversion}" >= "5.0"
-%patch2 -p1
-%endif
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
       testsuite/systemtap.examples/general/pyexample.py
