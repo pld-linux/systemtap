@@ -1,5 +1,4 @@
-#
-# Conditional build:
+# # Conditional build:
 %bcond_without	doc		# documentation build
 %bcond_with	publican	# publican guides build [as of 3.0 not rebuilt automatically, PDFs are included]
 %bcond_without	crash		# crash extension
@@ -18,19 +17,15 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	3.3
-Release:	10
+Version:	4.8
+Release:	0.1
 License:	GPL v2+
 Group:		Base
-Source0:	http://sourceware.org/systemtap/ftp/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	7f80117649a9eb663781b5372e8a4f96
+Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
+# Source0-md5:	c0d629b1188a649a482b95661b53c910
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
-Patch1:		%{name}-build.patch
-Patch2:		%{name}-rpm5-support.patch
-Patch3:		%{name}-no-werror.patch
-Patch4:		format-security.patch
-Patch5:		%{name}-dyninst.patch
+Patch0:		%{name}-rpm5-support.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -283,11 +278,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 
 %prep
 %setup -q
-%patch1 -p1
-%{?with_rpm5:%patch2 -p1}
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
+%{?with_rpm5:%patch0 -p1}
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
       testsuite/systemtap.examples/general/pyexample.py
