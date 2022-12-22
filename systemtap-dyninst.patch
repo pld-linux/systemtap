@@ -1,0 +1,20 @@
+--- systemtap-4.8/configure.ac.orig	2022-12-22 21:35:37.166595472 +0100
++++ systemtap-4.8/configure.ac	2022-12-22 22:10:12.192020762 +0100
+@@ -625,7 +625,7 @@ no) ;;
+      old_LIBS="$LIBS"
+      old_LDFLAGS="$LDFLAGS"
+      AC_LANG_PUSH(C++)
+-     for location in /usr/lib64/dyninst /usr/lib/dyninst ${libdir}/dyninst; do
++     for location in ${libdir} /usr/lib64/dyninst /usr/lib/dyninst ${libdir}/dyninst; do
+        LDFLAGS="-L${location}"
+          LIBS="-lparseAPI ${BOOST_SYSTEM_LIB}"
+ 	   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <dyninst/CodeSource.h>]],
+@@ -646,7 +646,7 @@ no) ;;
+        save_LIBS="$LIBS"
+        AC_CHECK_LIB(tbb, TBB_runtime_interface_version, [tbb_LIBS=-ltbb],[tbb_LIBS=])       
+        LIBS="$save_LIBS"
+-       DYNINST_LIBS="-lparseAPI -lsymtabAPI -linstructionAPI $tbb_LIBS -lcommon"
++       DYNINST_LIBS="-lparseAPI -lsymtabAPI -linstructionAPI $tbb_LIBS -ldyncommon"
+      fi
+      ;;
+ *)  # Use paths in the user-specified prefix

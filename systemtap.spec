@@ -25,7 +25,8 @@ Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
 # Source0-md5:	c0d629b1188a649a482b95661b53c910
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
-Patch0:		%{name}-rpm5-support.patch
+Patch0:		%{name}-dyninst.patch
+Patch1:		%{name}-rpm5-support.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -278,7 +279,8 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 
 %prep
 %setup -q
-%{?with_rpm5:%patch0 -p1}
+%patch0 -p1
+%{?with_rpm5:%patch1 -p1}
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
       testsuite/systemtap.examples/general/pyexample.py
@@ -378,13 +380,14 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_mandir}/man7/error::*.7stap*
 %{_mandir}/man7/stappaths.7*
+%{_mandir}/man7/warning::buildid.7stap*
 %{_mandir}/man7/warning::debuginfo.7stap*
+%{_mandir}/man7/warning::pass5.7stap*
 %{_mandir}/man7/warning::symbols.7stap*
 %{_mandir}/man8/stapbpf.8*
 %{?with_dyninst:%{_mandir}/man8/stapdyn.8*}
 %{_mandir}/man8/staprun.8*
 %{_mandir}/man8/stapsh.8*
-%{_mandir}/man8/systemtap.8*
 %lang(cs) %{_mandir}/cs/man1/stap-merge.1*
 %lang(cs) %{_mandir}/cs/man1/stap-report.1*
 %lang(cs) %{_mandir}/cs/man1/stapref.1*
@@ -394,6 +397,7 @@ rm -rf $RPM_BUILD_ROOT
 %lang(cs) %{_mandir}/cs/man3/stapvars.3stap*
 %lang(cs) %{_mandir}/cs/man7/error::*.7stap*
 %lang(cs) %{_mandir}/cs/man7/stappaths.7*
+%lang(cs) %{_mandir}/cs/man7/warning::buildid.7stap*
 %lang(cs) %{_mandir}/cs/man7/warning::debuginfo.7stap*
 %lang(cs) %{_mandir}/cs/man7/warning::symbols.7stap*
 %lang(cs) %{_mandir}/cs/man8/stapsh.8*
@@ -403,7 +407,7 @@ rm -rf $RPM_BUILD_ROOT
 %files runtime-java
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libexecdir}/%{name}/stapbm
-%attr(755,root,root) %{_libexecdir}/%{name}/libHelperSDT_*.so
+%attr(755,root,root) %{_libexecdir}/%{name}/libHelperSDT.so
 %{_libexecdir}/%{name}/HelperSDT.jar
 %endif
 
@@ -441,8 +445,16 @@ rm -rf $RPM_BUILD_ROOT
 %lang(cs) %{_mandir}/cs/man1/stap-prep.1*
 %lang(cs) %{_mandir}/cs/man1/stapvirt.1*
 
+#%files exporter
+%attr(755,root,root) %{_sbindir}/stap-exporter
+%{_sysconfdir}/stap-exporter
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/stap-exporter
+%{systemdunitdir}/stap-exporter.service
+%{_mandir}/man8/stap-exporter.8*
+
 %files devel
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/stap-profile-annotate
 %{_datadir}/%{name}/runtime
 %if %{with python2} || %{with python3}
 %dir %{_libexecdir}/%{name}
@@ -483,6 +495,7 @@ rm -rf $RPM_BUILD_ROOT
 #%attr(755,stap-server,stap-server) %dir /var/log/stap-server
 #%attr(755,stap-server,stap-server) %dir /var/run/stap-server
 %{_mandir}/man8/stap-server.8*
+%{_mandir}/man8/systemtap-service.8*
 %lang(cs) %{_mandir}/cs/man8/stap-server.8*
 
 %files sdt-devel
