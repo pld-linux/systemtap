@@ -1,0 +1,14 @@
+--- systemtap-4.8/stap-exporter/Makefile.am.orig	2022-11-03 19:25:11.000000000 +0100
++++ systemtap-4.8/stap-exporter/Makefile.am	2022-12-23 21:36:03.708382741 +0100
+@@ -11,9 +11,9 @@ man8_MANS = stap-exporter.8
+ install-data-local:
+ 	$(MKDIR_P) "$(DESTDIR)$(sysconfdir)/stap-exporter"
+ 	cd $(srcdir)/default; find . | cpio -pdmv "$(DESTDIR)$(sysconfdir)/stap-exporter/"
+-	$(MKDIR_P) "$(DESTDIR)$(prefix)/lib/systemd/system"
++	$(MKDIR_P) "$(DESTDIR)/lib/systemd/system"
+ 	$(MKDIR_P) "$(DESTDIR)$(sysconfdir)/sysconfig"
+-	$(INSTALL_DATA) $(srcdir)/stap-exporter.service "$(DESTDIR)$(prefix)/lib/systemd/system"
++	$(INSTALL_DATA) $(srcdir)/stap-exporter.service "$(DESTDIR)/lib/systemd/system"
+ 	$(INSTALL_DATA) $(srcdir)/stap-exporter.options "$(DESTDIR)$(sysconfdir)/sysconfig/stap-exporter"
+ 
+ uninstall-local:

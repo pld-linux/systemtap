@@ -1,4 +1,5 @@
-# # Conditional build:
+#
+# Conditional build:
 %bcond_without	doc		# documentation build
 %bcond_with	publican	# publican guides build [as of 3.0 not rebuilt automatically, PDFs are included]
 %bcond_without	crash		# crash extension
@@ -6,7 +7,7 @@
 %bcond_without	java		# Java runtime support
 %bcond_without	python2		# Python 2.x runtime support
 %bcond_without	python3		# Python 3.x runtime support
-%bcond_with	rpm5	# build with rpm5
+%bcond_with	rpm5		# build with rpm5
 
 %ifnarch %{ix86} %{x8664} x32 alpha arm ia64 ppc64 s390 s390x
 %undefine	with_crash
@@ -26,7 +27,8 @@ Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
-Patch1:		%{name}-rpm5-support.patch
+Patch1:		%{name}-systemd.patch
+Patch2:		%{name}-rpm5-support.patch
 URL:		http://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake
@@ -184,6 +186,22 @@ uruchamiania ich przy użyciu lokalnej lub zdalnej instalacji
 systemtap-runtime. Zawiera przykłady skryptów oraz dokumentację, a
 także kopię biblioteki tapset.
 
+%package exporter
+Summary:	Systemtap-Prometheus interoperation mechanism
+Summary(pl.UTF-8):	Mechanizm współpracy Systemtap-Prometheus
+Group:		Applications/System
+Requires:	%{name}-runtime = %{version}-%{release}
+
+%description exporter
+This package includes files for a systemd service that manages
+systemtap sessions and relays Prometheus metrics from the sessions to
+remote requesters on demand.
+
+%description exporter -l pl.UTF-8
+Ten pakiet zawiera pliki usługi systemd zarządzającej sesjami
+systemtap i przekazującej na żądanie metryki Prometheusa z sesji do
+zdalnych klientów.
+
 %package devel
 Summary:	Programmable system-wide instrumentation system - development headers, tools
 Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - pliki nagłówkowe, narzędzia
@@ -280,7 +298,8 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %prep
 %setup -q
 %patch0 -p1
-%{?with_rpm5:%patch1 -p1}
+%patch1 -p1
+%{?with_rpm5:%patch2 -p1}
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
       testsuite/systemtap.examples/general/pyexample.py
@@ -445,7 +464,8 @@ rm -rf $RPM_BUILD_ROOT
 %lang(cs) %{_mandir}/cs/man1/stap-prep.1*
 %lang(cs) %{_mandir}/cs/man1/stapvirt.1*
 
-#%files exporter
+%files exporter
+%defattr(644,root,root,755)
 %attr(755,root,root) %{_sbindir}/stap-exporter
 %{_sysconfdir}/stap-exporter
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/stap-exporter
