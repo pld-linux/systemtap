@@ -9,7 +9,7 @@
 %bcond_without	python3		# Python 3.x runtime support
 %bcond_with	rpm5		# build with rpm5
 
-%ifnarch %{ix86} %{x8664} x32 alpha arm ia64 ppc64 s390 s390x
+%ifnarch %{ix86} %{x8664} x32 alpha %{arm} ia64 ppc64 s390 s390x
 %undefine	with_crash
 %endif
 %ifnarch %{ix86} %{x8664} x32 ppc ppc64 aarch64
@@ -19,7 +19,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	4.8
-Release:	2
+Release:	3
 License:	GPL v2+
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
