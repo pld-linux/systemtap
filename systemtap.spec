@@ -327,7 +327,10 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	--enable-server \
 	--enable-sqlite \
 	--with-dyninst%{!?with_dyninst:=no} \
-	--with-java=%{?with_java:%{java_home}}%{!?with_java:no}
+	--with-java=%{?with_java:%{java_home}}%{!?with_java:no} \
+	%{!?with_python2:--without-python2-probes} \
+	%{!?with_python3:--without-python3-probes}
+
 %{__make} \
 	%{?with_java:JAVAC="%{java_home}/bin/javac"} \
 	%{?with_java:JAR="%{java_home}/bin/jar"}
