@@ -41,6 +41,7 @@ BuildRequires:	boost-devel
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
 BuildRequires:	elfutils-devel >= 0.148
+BuildRequires:	elfutils-debuginfod-devel >= 0.148
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
