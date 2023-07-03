@@ -1,3 +1,5 @@
+# TODO:
+# - package jupyter files
 #
 # Conditional build:
 %bcond_without	doc		# documentation build
@@ -21,12 +23,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	4.8
-Release:	3
+Version:	4.9
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	c0d629b1188a649a482b95661b53c910
+# Source0-md5:	32734fa4c4e240f5345fba244de1034c
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
