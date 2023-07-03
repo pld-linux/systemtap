@@ -320,6 +320,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 %{__autoheader}
 %{__automake}
 %configure \
+	CXXFLAGS="%{rpmcxxflags} -Wno-dangling-pointer" \
 	%{?with_java:have_javac="%{java_home}/bin/javac"} \
 	%{?with_java:have_jar="%{java_home}/bin/jar"} \
 	--disable-silent-rules \
