@@ -362,7 +362,9 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/{conf.d,script.d}
 install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
 install -d $RPM_BUILD_ROOT/var/log/stap-server
 
+%if %{with doc}
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
+%endif
 
 %if %{with python2}
 %py_postclean
