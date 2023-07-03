@@ -317,6 +317,8 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 %{__autoheader}
 %{__automake}
 %configure \
+	%{?with_java:have_javac="%{java_home}/bin/javac"} \
+	%{?with_java:have_jar="%{java_home}/bin/jar"} \
 	--disable-silent-rules \
 	%{?with_crash:--enable-crash} \
 	--enable-docs%{!?with_doc:=no} \
@@ -325,7 +327,9 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	--enable-sqlite \
 	--with-dyninst%{!?with_dyninst:=no} \
 	--with-java=%{?with_java:%{java_home}}%{!?with_java:no}
-%{__make}
+%{__make} \
+	%{?with_java:JAVAC="%{java_home}/bin/javac"} \
+	%{?with_java:JAR="%{java_home}/bin/jar"}
 
 %install
 rm -rf $RPM_BUILD_ROOT
