@@ -15,6 +15,9 @@
 %ifnarch %{ix86} %{x8664} x32 ppc ppc64 aarch64
 %undefine	with_dyninst
 %endif
+
+%{?use_default_jdk}
+
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
@@ -42,7 +45,7 @@ BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
 BuildRequires:	json-c-devel >= 0.12
-%{?with_java:BuildRequires:	jdk}
+%{?with_java:%{?use_jdk:%buildrequires_jdk}%{!?use_jdk:BuildRequires:	jdk}}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
@@ -65,7 +68,7 @@ BuildRequires:	readline-devel
 BuildRequires:	rpm-devel
 %{?with_java:BuildRequires:	rpm-javaprov}
 BuildRequires:	rpm-pythonprov
-BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	rpmbuild(macros) >= 2.021
 BuildRequires:	sqlite3-devel >= 3.7
 BuildRequires:	xmlto
 %if %{with doc}
@@ -321,7 +324,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	--enable-server \
 	--enable-sqlite \
 	--with-dyninst%{!?with_dyninst:=no} \
-	--with-java=%{?with_java:%{_jvmdir}/java}%{!?with_java:no}
+	--with-java=%{?with_java:%{java_home}}%{!?with_java:no}
 %{__make}
 
 %install
