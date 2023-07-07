@@ -48,7 +48,7 @@ BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
 BuildRequires:	json-c-devel >= 0.12
-%{?with_java:%{?use_jdk:%buildrequires_jdk}%{!?use_jdk:BuildRequires:	jdk}}
+%{?with_java:%buildrequires_jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
 %endif
