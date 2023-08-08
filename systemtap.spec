@@ -24,7 +24,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	4.9
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
@@ -276,6 +276,8 @@ Summary:	Static probe support tools
 Summary(pl.UTF-8):	Narzędzia do obsługi sond statycznych
 License:	GPL v2+ and Public Domain
 Group:		Development/Libraries
+Requires:	python3-modules >= 1:3.2
+Suggests:	python3-pyparsing
 
 %description sdt-devel
 This package includes the <sys/sdt.h> header file used for static
