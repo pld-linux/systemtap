@@ -64,6 +64,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	python-devel >= 1:2.6
 BuildRequires:	python-setuptools
 %endif
+BuildRequires:	python3 >= 1:3.2
 %if %{with python3}
 BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-setuptools
@@ -334,6 +335,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	--enable-sqlite \
 	--with-dyninst%{!?with_dyninst:=no} \
 	--with-java=%{?with_java:%{java_home}}%{!?with_java:no} \
+	--with-python3 \
 	%{!?with_python2:--without-python2-probes} \
 	%{!?with_python3:--without-python3-probes}
 
