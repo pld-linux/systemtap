@@ -57,6 +57,7 @@ BuildRequires:	libvirt-devel >= 1.0.2
 BuildRequires:	libxml2-devel >= 2.0
 BuildRequires:	mysql-devel
 BuildRequires:	ncurses-devel
+BuildRequires:	ncurses-ext-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	pkgconfig
 %if %{with python2}
