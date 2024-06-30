@@ -1,0 +1,11 @@
+--- systemtap-5.1/client-http.cxx.orig	2024-04-26 23:34:34.000000000 +0200
++++ systemtap-5.1/client-http.cxx	2024-06-30 20:34:23.381113552 +0200
+@@ -37,7 +37,7 @@ extern "C" {
+ #include <elfutils/libdwfl.h>
+ #include <elfutils/libdw.h>
+ #include <fcntl.h>
+-#include <nss3/nss.h>
++#include <nss/nss.h>
+ 
+ #ifdef HAVE_RPMCRYPTO_H
+ #include <rpm/rpmcrypto.h>

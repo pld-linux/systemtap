@@ -6,6 +6,7 @@
 %bcond_with	publican	# publican guides build [as of 3.0 not rebuilt automatically, PDFs are included]
 %bcond_without	crash		# crash extension
 %bcond_without	dyninst		# dyninst support
+%bcond_without	httpd		# HTTP web service support
 %bcond_without	java		# Java runtime support
 %bcond_without	python2		# Python 2.x runtime support
 %bcond_without	python3		# Python 3.x runtime support
@@ -23,31 +24,34 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	4.9
-Release:	2
+Version:	5.1
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	32734fa4c4e240f5345fba244de1034c
+# Source0-md5:	d4f8d8f2ed09031a9a284e894c95103e
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
 Patch1:		%{name}-systemd.patch
 Patch2:		%{name}-rpm5-support.patch
-URL:		http://sourceware.org/systemtap/
-BuildRequires:	autoconf >= 2.63
+Patch3:		%{name}-nss.patch
+Patch4:		%{name}-types.patch
+Patch5:		%{name}-install.patch
+URL:		https://sourceware.org/systemtap/
+BuildRequires:	autoconf >= 2.71
 BuildRequires:	automake
 BuildRequires:	avahi-devel
 BuildRequires:	boost-devel
 %{?with_crash:BuildRequires:	crash-devel}
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
-BuildRequires:	elfutils-devel >= 0.148
-BuildRequires:	elfutils-debuginfod-devel >= 0.148
+BuildRequires:	elfutils-devel >= 0.179
+BuildRequires:	elfutils-debuginfod-devel >= 0.179
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
-BuildRequires:	json-c-devel >= 0.12
+BuildRequires:	json-c-devel >= 0.13
 %{?with_java:%buildrequires_jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
@@ -76,6 +80,11 @@ BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 2.021
 BuildRequires:	sqlite3-devel >= 3.7
 BuildRequires:	xmlto
+%if %{with httpd}
+BuildRequires:	curl-devel >= 7.19.7
+BuildRequires:	libmicrohttpd-devel >= 0.9.1
+BuildRequires:	libuuid-devel >= 2.17.0
+%endif
 %if %{with doc}
 BuildRequires:	latex2html
 %{?with_publican:BuildRequires:	publican}
@@ -107,7 +116,8 @@ lokalnego tworzenia i wykonywania skryptów systemtap.
 Summary:	Programmable system-wide instrumentation system - runtime
 Summary(pl.UTF-8):	Programowalny systemowy system oprzyrządowania - środowisko uruchomieniowe
 Group:		Applications/System
-Requires:	json-c >= 0.12
+Requires:	json-c >= 0.13
+Requires:	uname(release) >= 3.10
 
 %description runtime
 SystemTap runtime contains the components needed to execute a
@@ -294,6 +304,20 @@ przestrzeni użytkownika, wraz z opcjonalnym preprocesorem zgodności z
 dtrace, który przetwarza pliki .d na pliki nagłówkowe .h z makrami
 śledzącymi.
 
+%package jupyter
+Summary:	ISystemtap Jupyter kernel and examples
+Summary(pl.UTF-8):	Jądro Jupyter i przykłady ISystemtap
+Group:		Libraries/Python
+Requires:	%{name}-client = %{version}-%{release}
+
+%description jupyter
+This package includes files needed to build and run the interactive
+systemtap Jupyter kernel, either locally or within a container.
+
+%description jupyter -l pl.UTF-8
+Ten pakiet zawiera pliki potrzebne do zbudowania i uruchomienia
+interaktywnego jądra Jupyter, zarówno lokalnie, jak i w kontenerze.
+
 %package doc
 Summary:	SystemTap guides and tutorials
 Summary(pl.UTF-8):	Przewodniki i dokumentacja wprowadzająca do SystemTap
@@ -310,12 +334,21 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %patch0 -p1
 %patch1 -p1
 %{?with_rpm5:%patch2 -p1}
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
-      testsuite/systemtap.examples/general/pyexample.py
+	testsuite/systemtap.examples/general/pyexample.py
 
 find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
-      %{__sed} -E -i -e '1s,#!\s*/usr/bin/env\s+stap(\s|$),#!%{_bindir}/stap\1,'
+	%{__sed} -E -i -e '1s,#!\s*/usr/bin/env\s+stap(\s|$),#!%{_bindir}/stap\1,'
+
+# this script is meant to be executed within container and accepts python 2.7/3.x
+# so /usr/bin/python is OK, but __spec_install_post_check_shebangs has no exclude
+# option (other than disabling whole check), so adjust shebang as well and assume
+# that /usr/bin/python3 will exist in container as well
+%{__sed} -i -e 's,/usr/bim/python$,/usr/bin/python3,' httpd/docker/fedora_install_package.py
 
 %build
 %{__gettextize}
@@ -330,6 +363,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	--disable-silent-rules \
 	%{?with_crash:--enable-crash} \
 	--enable-docs%{!?with_doc:=no} \
+	%{?with_httpd:--enable-http} \
 	--enable-pie \
 	--enable-server \
 	--enable-sqlite \
@@ -538,6 +572,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/stap-server.8*
 %{_mandir}/man8/systemtap-service.8*
 %lang(cs) %{_mandir}/cs/man8/stap-server.8*
+%if %{with httpd}
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-httpd
+%{_libexecdir}/%{name}/httpd
+%dir %{_datadir}/%{name}/httpd
+%dir %{_datadir}/%{name}/httpd/docker
+%{_datadir}/%{name}/httpd/docker/*.json
+%attr(755,root,root) %{_datadir}/%{name}/httpd/docker/fedora_install_package.py
+#/etc/sudoers.d/stap-server
+%endif
 
 %files sdt-devel
 %defattr(644,root,root,755)
@@ -546,6 +589,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/sys/sdt-config.h
 %{_mandir}/man1/dtrace.1*
 %lang(cs) %{_mandir}/cs/man1/dtrace.1*
+
+%files jupyter
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/stap-jupyter-container
+%attr(755,root,root) %{_bindir}/stap-jupyter-install
+%{_datadir}/%{name}/interactive-notebook
+%{_mandir}/man1/stap-jupyter.1*
 
 %if %{with doc}
 %files doc

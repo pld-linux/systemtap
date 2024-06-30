@@ -1,0 +1,19 @@
+--- systemtap-5.1/httpd/docker/Makefile.am.orig	2024-04-26 23:34:34.000000000 +0200
++++ systemtap-5.1/httpd/docker/Makefile.am	2024-06-30 21:32:41.015498574 +0200
+@@ -1,6 +1,6 @@
+ AUTOMAKE_OPTIONS = no-dist foreign subdir-objects
+ 
+-pkgdatadockerdir = $(DESTDIR)$(pkgdatadir)/httpd/docker
++pkgdatadockerdir = $(pkgdatadir)/httpd/docker
+ 
+ # Any file in the following variable will get installed to
+ # $(pkgdatadockerdir).
+@@ -10,7 +10,7 @@ pkgdatadocker_DATA =
+ # install time.
+ pkglibexecdocker_PYTHON =
+ 
+-pkglibexecdockerdir = $(DESTDIR)$(pkglibexecdir)/httpd/docker
++pkglibexecdockerdir = $(pkglibexecdir)/httpd/docker
+ 
+ if HAVE_HTTP_SUPPORT
+ 

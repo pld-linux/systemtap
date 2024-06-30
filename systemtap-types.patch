@@ -1,0 +1,11 @@
+--- systemtap-5.1/httpd/server.cxx.orig	2024-04-26 23:34:34.000000000 +0200
++++ systemtap-5.1/httpd/server.cxx	2024-06-30 20:45:04.377640976 +0200
+@@ -214,7 +214,7 @@ connection_info::postdataiterator(enum M
+ 				  size_t size)
+ {
+     if (filename && key) {
+-	server_error(_F("key='%s', filename='%s', size=%ld", key, filename,
++	server_error(_F("key='%s', filename='%s', size=%zd", key, filename,
+ 			size));
+ 
+ 	// If we've got a filename, we need a temporary directory to
