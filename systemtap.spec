@@ -38,6 +38,7 @@ Patch2:		%{name}-rpm5-support.patch
 Patch3:		%{name}-nss.patch
 Patch4:		%{name}-types.patch
 Patch5:		%{name}-install.patch
+Patch6:		%{name}-curl.patch
 URL:		https://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.71
 BuildRequires:	automake
@@ -337,6 +338,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
 	testsuite/systemtap.examples/general/pyexample.py

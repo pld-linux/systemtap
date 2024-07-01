@@ -1,0 +1,68 @@
+--- systemtap-5.1/client-http.cxx.orig	2024-07-01 19:22:24.884045940 +0200
++++ systemtap-5.1/client-http.cxx	2024-07-01 20:44:52.107754773 +0200
+@@ -654,8 +654,8 @@ http_client::post (const string & url,
+ {
+   struct curl_slist *headers = NULL;
+   int still_running = false;
+-  struct curl_httppost *formpost = NULL;
+-  struct curl_httppost *lastptr = NULL;
++  curl_mime *mime = curl_mime_init(curl);
++  curl_mimepart *part = NULL;
+   struct json_object *jobj = json_object_new_object();
+ 
+   // Add parameter info
+@@ -703,14 +703,12 @@ http_client::post (const string & url,
+       string filename = (*it);
+       string filebase = basename (filename.c_str());
+ 
+-      curl_formadd (&formpost, &lastptr,
+-		    CURLFORM_COPYNAME, filebase.c_str(),
+-		    CURLFORM_FILE, filename.c_str(),
+-		    CURLFORM_END);
+-      curl_formadd (&formpost, &lastptr,
+-                    CURLFORM_COPYNAME, "files",
+-                    CURLFORM_COPYCONTENTS, filename.c_str(),
+-                    CURLFORM_END);
++      part = curl_mime_addpart(mime);
++      curl_mime_name(part, filebase.c_str());
++      curl_mime_filedata(part, filename.c_str());
++      part = curl_mime_addpart(mime);
++      curl_mime_name(part, "files");
++      curl_mime_data(part, filename.c_str(), CURL_ZERO_TERMINATED);
+     }
+ 
+   // Add package info
+@@ -758,19 +756,17 @@ http_client::post (const string & url,
+         json_object_object_add (jobj, "env_vars", jlvobj);
+     }
+ 
+-  curl_formadd (&formpost, &lastptr,
+-      CURLFORM_COPYNAME, "command_environment",
+-      CURLFORM_CONTENTTYPE, "application/json",
+-      CURLFORM_COPYCONTENTS,
+-      json_object_to_json_string_ext (jobj, JSON_C_TO_STRING_PLAIN),
+-      CURLFORM_END);
++  part = curl_mime_addpart(mime);
++  curl_mime_name(part, "command_environment");
++  curl_mime_type(part, "application/json");
++  curl_mime_data(part, json_object_to_json_string_ext (jobj, JSON_C_TO_STRING_PLAIN), CURL_ZERO_TERMINATED);
+   json_object_put(jobj);
+ 
+   headers = curl_slist_append (headers, "Expect:");
+ 
+   curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
+   curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headers);
+-  curl_easy_setopt (curl, CURLOPT_HTTPPOST, formpost);
++  curl_easy_setopt (curl, CURLOPT_MIMEPOST, mime);
+ 
+   CURLM *multi_handle = curl_multi_init();
+   curl_multi_add_handle (multi_handle, curl);
+@@ -840,7 +836,7 @@ http_client::post (const string & url,
+   } while (still_running);
+ 
+   curl_multi_cleanup (multi_handle);
+-  curl_formfree (formpost);
++  curl_mime_free(mime);
+   curl_slist_free_all (headers);
+ 
+   return true;
