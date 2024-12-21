@@ -24,12 +24,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	5.1
+Version:	5.2
 Release:	1
 License:	GPL v2+
 Group:		Base
-Source0:	ftp://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	d4f8d8f2ed09031a9a284e894c95103e
+Source0:	http://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
+# Source0-md5:	780b4e1086bf34c8b1cba75048fbcfeb
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
@@ -47,8 +47,8 @@ BuildRequires:	boost-devel
 %{?with_crash:BuildRequires:	crash-devel}
 BuildRequires:	docbook-dtd412-xml
 %{?with_dyninst:BuildRequires:	dyninst-devel >= 8.0}
-BuildRequires:	elfutils-devel >= 0.179
 BuildRequires:	elfutils-debuginfod-devel >= 0.179
+BuildRequires:	elfutils-devel >= 0.179
 BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
@@ -332,13 +332,13 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-%{?with_rpm5:%patch2 -p1}
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
+%patch -P 0 -p1
+%patch -P 1 -p1
+%{?with_rpm5:%patch -P 2 -p1}
+%patch -P 3 -p1
+%patch -P 4 -p1
+%patch -P 5 -p1
+%patch -P 6 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
 	testsuite/systemtap.examples/general/pyexample.py
