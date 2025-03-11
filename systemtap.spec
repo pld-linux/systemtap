@@ -25,7 +25,7 @@ Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
 Version:	5.2
-Release:	5
+Release:	6
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
