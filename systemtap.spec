@@ -76,6 +76,7 @@ BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-setuptools
 %endif
 BuildRequires:	readline-devel
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpm-devel
 %{?with_java:BuildRequires:	rpm-javaprov}
 BuildRequires:	rpm-pythonprov
@@ -326,6 +327,7 @@ interaktywnego jądra Jupyter, zarówno lokalnie, jak i w kontenerze.
 Summary:	SystemTap guides and tutorials
 Summary(pl.UTF-8):	Przewodniki i dokumentacja wprowadzająca do SystemTap
 Group:		Documentation
+BuildArch:	noarch
 
 %description doc
 SystemTap guides and tutorials.
