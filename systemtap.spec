@@ -101,6 +101,8 @@ Requires:	%{name}-client = %{version}-%{release}
 Requires:	%{name}-devel = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
+%define		filterout_cpp	-DNDEBUG
+
 %description
 SystemTap is an instrumentation system for systems running Linux 2.6.
 Developers can write instrumentation to collect data on the operation
