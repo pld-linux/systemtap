@@ -39,6 +39,7 @@ Patch3:		%{name}-nss.patch
 Patch4:		%{name}-types.patch
 Patch5:		%{name}-install.patch
 Patch6:		%{name}-curl.patch
+Patch7:		libxml2.14.patch
 URL:		https://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.71
 BuildRequires:	automake
@@ -341,6 +342,7 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %patch -P 4 -p1
 %patch -P 5 -p1
 %patch -P 6 -p1
+%patch -P 7 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
 	testsuite/systemtap.examples/general/pyexample.py

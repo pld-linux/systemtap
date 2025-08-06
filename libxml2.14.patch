@@ -1,0 +1,13 @@
+--- systemtap-5.2/stapvirt.c.orig	2024-11-08 20:25:26.000000000 +0100
++++ systemtap-5.2/stapvirt.c	2025-08-06 17:47:33.426022066 +0200
+@@ -661,8 +661,8 @@
+         goto cleanup_buf;
+     }
+ 
+-    int rc = attach ? virDomainAttachDevice(dom, (const char *) buf->content)
+-                    : virDomainDetachDevice(dom, (const char *) buf->content);
++    int rc = attach ? virDomainAttachDevice(dom, (const char *) xmlBufferContent(buf))
++                    : virDomainDetachDevice(dom, (const char *) xmlBufferContent(buf));
+     if (rc != 0) {
+         err("Couldn't %s the device\n", attach ? "attach" : "detach");
+         ret = -1;
