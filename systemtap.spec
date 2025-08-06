@@ -24,12 +24,12 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	5.2
-Release:	8
+Version:	5.3
+Release:	1
 License:	GPL v2+
 Group:		Base
 Source0:	http://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	780b4e1086bf34c8b1cba75048fbcfeb
+# Source0-md5:	e62bb69cc17f43da682091dae1c5f956
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
