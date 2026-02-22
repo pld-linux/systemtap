@@ -9,3 +9,14 @@
  			size));
  
  	// If we've got a filename, we need a temporary directory to
+--- systemtap-5.4/elaborate.cxx.orig	2025-10-30 15:47:35.000000000 +0100
++++ systemtap-5.4/elaborate.cxx	2026-02-22 15:47:22.632541432 +0100
+@@ -5116,7 +5116,7 @@ const_folder::visit_defined_op (defined_
+       // Don't be greedy... we'll only collapse one at a time so type
+       // resolution can have another go at it.
+       relaxed_p = false;
+-      session.print_warning (_F("Collapsing unresolved @define to %ld [stapprobes]", value), e->tok);
++      session.print_warning (_F("Collapsing unresolved @define to %" PRId64 " [stapprobes]", value), e->tok);
+       literal_number* n = new literal_number (value);
+       n->tok = e->tok;
+       n->visit (this);
