@@ -294,7 +294,7 @@ Summary(pl.UTF-8):	Narzędzia do obsługi sond statycznych
 License:	GPL v2+ and Public Domain
 Group:		Development/Libraries
 Requires:	python3-modules >= 1:3.2
-Suggests:	python3-pyparsing
+Requires:	python3-pyparsing
 
 %description sdt-devel
 This package includes the <sys/sdt.h> header file used for static
