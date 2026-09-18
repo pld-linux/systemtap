@@ -6,11 +6,8 @@
 %bcond_with	publican	# publican guides build [as of 3.0 not rebuilt automatically, PDFs are included]
 %bcond_without	crash		# crash extension
 %bcond_without	dyninst		# dyninst support
-%bcond_without	httpd		# HTTP web service support
 %bcond_without	java		# Java runtime support
-%bcond_without	python2		# Python 2.x runtime support
 %bcond_without	python3		# Python 3.x runtime support
-%bcond_with	rpm5		# build with rpm5
 
 %ifnarch %{ix86} %{x8664} x32 alpha %{arm} ia64 ppc64 s390 s390x
 %undefine	with_crash
@@ -24,22 +21,18 @@
 Summary:	Instrumentation System
 Summary(pl.UTF-8):	System oprzyrządowania
 Name:		systemtap
-Version:	5.4
+Version:	5.6
 Release:	1
 License:	GPL v2+
 Group:		Base
-Source0:	http://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
-# Source0-md5:	049bff5690247e365937af8acdd14aa3
+Source0:	https://sourceware.org/pub/systemtap/releases/%{name}-%{version}.tar.gz
+# Source0-md5:	14da9933ae257da020179b2ac869fd2d
 Source1:	%{name}.tmpfiles
 Source2:	stap-server.tmpfiles
 Patch0:		%{name}-dyninst.patch
 Patch1:		%{name}-systemd.patch
-Patch2:		%{name}-rpm5-support.patch
-Patch3:		%{name}-nss.patch
-Patch4:		%{name}-types.patch
-Patch5:		%{name}-install.patch
-Patch6:		%{name}-curl.patch
-Patch7:		libxml2.14.patch
+Patch2:		%{name}-staprun-version-flush.patch
+Patch3:		%{name}-onboot-slog.patch
 URL:		https://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.71
 BuildRequires:	automake
@@ -54,6 +47,7 @@ BuildRequires:	gettext-devel >= 0.19.4
 BuildRequires:	gettext-tools >= 0.19.4
 BuildRequires:	glib2-devel >= 2.0
 BuildRequires:	json-c-devel >= 0.13
+BuildRequires:	libbpf-devel >= 1.0
 %{?with_java:%buildrequires_jdk}
 %if %{with dyninst} || %{with java}
 BuildRequires:	libselinux-devel
@@ -66,14 +60,12 @@ BuildRequires:	ncurses-devel
 BuildRequires:	ncurses-ext-devel
 BuildRequires:	nss-devel >= 3
 BuildRequires:	pkgconfig
-%if %{with python2}
-BuildRequires:	python-devel >= 1:2.6
-BuildRequires:	python-setuptools
-%endif
 BuildRequires:	python3 >= 1:3.2
 %if %{with python3}
-BuildRequires:	python3-devel >= 1:3.2
-BuildRequires:	python3-setuptools
+BuildRequires:	python3-devel >= 1:3.6
+BuildRequires:	python3-pip
+# bdist_wheel is built into setuptools since 70.1, so python3-wheel is not needed
+BuildRequires:	python3-setuptools >= 70.1
 %endif
 BuildRequires:	readline-devel
 BuildRequires:	rpm-build >= 4.6
@@ -83,11 +75,7 @@ BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 2.021
 BuildRequires:	sqlite3-devel >= 3.7
 BuildRequires:	xmlto
-%if %{with httpd}
-BuildRequires:	curl-devel >= 7.19.7
-BuildRequires:	libmicrohttpd-devel >= 0.9.1
-BuildRequires:	libuuid-devel >= 2.17.0
-%endif
+BuildRequires:	zlib-devel
 %if %{with doc}
 BuildRequires:	latex2html
 %{?with_publican:BuildRequires:	publican}
@@ -151,27 +139,12 @@ Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
 sondujących procesy Javy działające w środowiskach OpenJDK 1.6 i
 OpenJDK 1.7 przy użyciu Bytemana.
 
-%package runtime-python2
-Summary:	SystemTap Python 2 Runtime Support
-Summary(pl.UTF-8):	Obsługa Pythona 2 dla środowiska uruchomieniowego SystemTap
-Group:		Development/Tools
-Requires:	%{name}-runtime = %{version}-%{release}
-Requires:	python-modules >= 1:2.6
-
-%description runtime-python2
-This package includes support files needed to run systemtap scripts
-that probe Python 2 processes.
-
-%description runtime-python2 -l pl.UTF-8
-Ten pakiet zawiera pliki niezbędne do uruchamiania skryptów systemtap
-sondujących procesy Pythona 2.
-
 %package runtime-python3
 Summary:	SystemTap Python 3 Runtime Support
 Summary(pl.UTF-8):	Obsługa Pythona 3 dla środowiska uruchomieniowego SystemTap
 Group:		Development/Tools
 Requires:	%{name}-runtime = %{version}-%{release}
-Requires:	python3-modules >= 1:3.2
+Requires:	python3-modules >= 1:3.6
 
 %description runtime-python3
 This package includes support files needed to run systemtap scripts
@@ -252,30 +225,44 @@ standardowej biblioteki tapset oraz pliki biblioteki uruchomieniowej
 C.
 
 %package initscript
-Summary:	SystemTap Initscripts
-Summary(pl.UTF-8):	Skrypty startowe SystemTap
+Summary:	SystemTap service units
+Summary(pl.UTF-8):	Jednostki usług SystemTap
 Group:		Base
-Requires(post,preun):	/sbin/chkconfig
+Requires(post,preun,postun):	systemd-units >= 38
 Requires:	%{name} = %{version}-%{release}
-Requires:	rc-scripts
+Requires:	systemd-units >= 38
 
 %description initscript
-SysVinit scripts to launch selected systemtap scripts at system
-startup.
+Systemd service templates to launch selected systemtap scripts at
+system startup (stap@.service compiles and runs scripts from
+/etc/systemtap/script.d, staprun@.service runs precompiled modules),
+along with a dracut module and the stap-onboot tool for embedding
+scripts into initramfs.
 
 %description initscript -l pl.UTF-8
-Skrypty SysVinit do uruchamiania wybranych skryptów systemtap w
-trakcie startu systemu.
+Szablony usług systemd do uruchamiania wybranych skryptów systemtap w
+trakcie startu systemu (stap@.service kompiluje i uruchamia skrypty z
+/etc/systemtap/script.d, staprun@.service uruchamia wcześniej
+skompilowane moduły), a także moduł dracuta i narzędzie stap-onboot do
+osadzania skryptów w initramfs.
 
 %package server
 Summary:	Instrumentation System Server
 Summary(pl.UTF-8):	Serwer systemu oprzyrządowania
 Group:		Applications/System
 Requires(post,preun):	/sbin/chkconfig
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 Requires:	%{name}-devel = %{version}-%{release}
 Requires:	/bin/mktemp
 Requires:	unzip
 Requires:	zip
+Provides:	group(stap-server)
+Provides:	user(stap-server)
 
 %description server
 This is the remote script compilation server component of systemtap.
@@ -339,24 +326,14 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 %setup -q
 %patch -P 0 -p1
 %patch -P 1 -p1
-%{?with_rpm5:%patch -P 2 -p1}
+%patch -P 2 -p1
 %patch -P 3 -p1
-%patch -P 4 -p1
-%patch -P 5 -p1
-%patch -P 6 -p1
-%patch -P 7 -p1
 
-%{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
+%{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
 	testsuite/systemtap.examples/general/pyexample.py
 
 find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 	%{__sed} -E -i -e '1s,#!\s*/usr/bin/env\s+stap(\s|$),#!%{_bindir}/stap\1,'
-
-# this script is meant to be executed within container and accepts python 2.7/3.x
-# so /usr/bin/python is OK, but __spec_install_post_check_shebangs has no exclude
-# option (other than disabling whole check), so adjust shebang as well and assume
-# that /usr/bin/python3 will exist in container as well
-%{__sed} -i -e 's,/usr/bim/python$,/usr/bin/python3,' httpd/docker/fedora_install_package.py
 
 %build
 %{__gettextize}
@@ -365,20 +342,20 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 %{__autoheader}
 %{__automake}
 %configure \
-	CXXFLAGS="%{rpmcxxflags} -Wno-dangling-pointer" \
+	PYTHON3=%{__python3} \
 	%{?with_java:have_javac="%{java_home}/bin/javac"} \
 	%{?with_java:have_jar="%{java_home}/bin/jar"} \
 	--disable-silent-rules \
 	%{?with_crash:--enable-crash} \
 	--enable-docs%{!?with_doc:=no} \
-	%{?with_httpd:--enable-http} \
 	--enable-pie \
 	--enable-server \
 	--enable-sqlite \
+	--with-dracutstap=%{_prefix}/lib/dracut/modules.d/99stap \
 	--with-dyninst%{!?with_dyninst:=no} \
 	--with-java=%{?with_java:%{java_home}}%{!?with_java:no} \
+	--with-libbpf \
 	--with-python3 \
-	%{!?with_python2:--without-python2-probes} \
 	%{!?with_python3:--without-python3-probes}
 
 %{__make} \
@@ -389,7 +366,7 @@ find testsuite/systemtap.examples/ -name '*.stp' -print0 | xargs -0 \
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{/var/{cache,run}/%{name},%{systemdtmpfilesdir},%{systemdunitdir}} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/stap-server/conf.d,/etc/{sysconfig,logrotate.d,rc.d/init.d}} \
-	$RPM_BUILD_ROOT/var/log/stap-server
+	$RPM_BUILD_ROOT{/var/log/stap-server,%{_prefix}/lib/dracut/modules.d/99stap}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -400,8 +377,9 @@ cp -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/stap-server.conf
 # not installed by make
 install -p stap-prep $RPM_BUILD_ROOT%{_bindir}/stap-prep
 
-install -p initscript/systemtap $RPM_BUILD_ROOT/etc/rc.d/init.d
-cp -p initscript/config.systemtap $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/config
+cp -p initscript/stap@.service initscript/staprun@.service $RPM_BUILD_ROOT%{systemdunitdir}
+install -p initscript/99stap/{check,install,module-setup.sh,start-staprun.sh} \
+	$RPM_BUILD_ROOT%{_prefix}/lib/dracut/modules.d/99stap
 
 install -p initscript/stap-server $RPM_BUILD_ROOT/etc/rc.d/init.d
 cp -p initscript/config.stap-server $RPM_BUILD_ROOT/etc/sysconfig/stap-server
@@ -410,15 +388,13 @@ cp -p stap-server.service $RPM_BUILD_ROOT%{systemdunitdir}
 
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/systemtap/{conf.d,script.d}
 install -d $RPM_BUILD_ROOT/var/lib/stap-server/.systemtap
-install -d $RPM_BUILD_ROOT/var/log/stap-server
 
 %if %{with doc}
 %{__mv} $RPM_BUILD_ROOT%{_docdir}/systemtap docs-installed
 %endif
 
-%if %{with python2}
-%py_postclean
-%endif
+# pl catalog has no translated messages, find_lang skips such empty .mo files
+%{__rm} $RPM_BUILD_ROOT%{_datadir}/locale/pl/LC_MESSAGES/%{name}.mo
 
 %find_lang %{name}
 
@@ -493,15 +469,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libexecdir}/%{name}/HelperSDT.jar
 %endif
 
-%if %{with python2}
-%files runtime-python2
-%defattr(644,root,root,755)
-%dir %{py_sitedir}/HelperSDT
-%attr(755,root,root) %{py_sitedir}/HelperSDT/_HelperSDT.so
-%{py_sitedir}/HelperSDT/*.py[co]
-%{py_sitedir}/HelperSDT-0.1.0-py*.egg-info
-%endif
-
 %if %{with python3}
 %files runtime-python3
 %defattr(644,root,root,755)
@@ -509,7 +476,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{py3_sitedir}/HelperSDT/_HelperSDT.cpython-*.so
 %{py3_sitedir}/HelperSDT/*.py
 %{py3_sitedir}/HelperSDT/__pycache__
-%{py3_sitedir}/HelperSDT-0.1.0-py*.egg-info
+%{py3_sitedir}/helpersdt-0.1.0.dist-info
 %endif
 
 %files client
@@ -539,20 +506,44 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/stap-profile-annotate
 %{_datadir}/%{name}/runtime
-%if %{with python2} || %{with python3}
+%if %{with python3}
 %dir %{_libexecdir}/%{name}
 %dir %{_libexecdir}/%{name}/python
 %attr(755,root,root) %{_libexecdir}/systemtap/python/stap-resolve-module-function.py
 %endif
 
+%pre server
+%groupadd -g 359 stap-server
+%useradd -u 359 -d /var/lib/stap-server -s /bin/false -c "SystemTap compile server" -g stap-server stap-server
+
+%postun server
+if [ "$1" = "0" ]; then
+	%userremove stap-server
+	%groupremove stap-server
+fi
+
+%post initscript
+%systemd_reload
+
+%postun initscript
+%systemd_reload
+
 %files initscript
 %defattr(644,root,root,755)
-%attr(754,root,root) /etc/rc.d/init.d/systemtap
+%attr(755,root,root) %{_bindir}/stap-onboot
+%attr(755,root,root) %{_libexecdir}/%{name}/stap-service-prepare
 %dir %{_sysconfdir}/systemtap
 %dir %{_sysconfdir}/systemtap/conf.d
 %dir %{_sysconfdir}/systemtap/script.d
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemtap/config
+%{systemdunitdir}/stap@.service
+%{systemdunitdir}/staprun@.service
 %{systemdtmpfilesdir}/systemtap.conf
+%dir %{_prefix}/lib/dracut/modules.d/99stap
+%attr(755,root,root) %{_prefix}/lib/dracut/modules.d/99stap/check
+%attr(755,root,root) %{_prefix}/lib/dracut/modules.d/99stap/install
+%attr(755,root,root) %{_prefix}/lib/dracut/modules.d/99stap/module-setup.sh
+%attr(755,root,root) %{_prefix}/lib/dracut/modules.d/99stap/start-staprun.sh
+%{_mandir}/man8/stap-onboot.8*
 %dir /var/cache/%{name}
 %dir /var/run/%{name}
 
@@ -572,23 +563,11 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/stap-server
 %{systemdunitdir}/stap-server.service
 %{systemdtmpfilesdir}/stap-server.conf
-# TODO: create user/group
-#%attr(750,stap-server,stap-server) %dir /var/lib/stap-server
-#%attr(700,stap-server,stap-server) %dir /var/lib/stap-server/.systemtap
-#%attr(755,stap-server,stap-server) %dir /var/log/stap-server
-#%attr(755,stap-server,stap-server) %dir /var/run/stap-server
+%attr(750,stap-server,stap-server) %dir /var/lib/stap-server
+%attr(700,stap-server,stap-server) %dir /var/lib/stap-server/.systemtap
+%attr(755,stap-server,stap-server) %dir /var/log/stap-server
 %{_mandir}/man8/stap-server.8*
-%{_mandir}/man8/systemtap-service.8*
 %lang(cs) %{_mandir}/cs/man8/stap-server.8*
-%if %{with httpd}
-%attr(755,root,root) %{_libexecdir}/%{name}/stap-httpd
-%{_libexecdir}/%{name}/httpd
-%dir %{_datadir}/%{name}/httpd
-%dir %{_datadir}/%{name}/httpd/docker
-%{_datadir}/%{name}/httpd/docker/*.json
-%attr(755,root,root) %{_datadir}/%{name}/httpd/docker/fedora_install_package.py
-#/etc/sudoers.d/stap-server
-%endif
 
 %files sdt-devel
 %defattr(644,root,root,755)

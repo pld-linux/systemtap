@@ -1,0 +1,12 @@
+# _exit() skips stdio flush, so "staprun -V | grep" sees nothing
+--- systemtap-5.6/staprun/common.c	2026-09-18 22:07:22.642150333 +0200
++++ systemtap-5.6/staprun/common.c	2026-09-18 23:40:03.932297050 +0200
+@@ -243,7 +243,7 @@
+                               "Copyright (C) 2005-2026 Red Hat, Inc. and others\n"
+                               "This is free software; see the source for copying conditions.\n"),
+                             VERSION, STAP_EXTENDED_VERSION);
+-                        _exit(0);
++                        exit(0);
+                         break;
+                 case 'h':
+                         usage(argv[0],0);

@@ -1,0 +1,12 @@
+# slog() was defined by the removed systemtap initscript, stap-onboot still calls it
+--- systemtap-5.6/initscript/stap-onboot.in	2026-09-18 22:07:22.622570979 +0200
++++ systemtap-5.6/initscript/stap-onboot.in	2026-09-18 23:40:03.935189095 +0200
+@@ -99,7 +99,7 @@
+ 
+ OPTS=`getopt -s bash -u -o 'r:c:o:b' -- $@`
+ if [ $? -ne 0 ]; then
+-  slog "Error: Argument parse error: $@"
++  echo "Error: Argument parse error: $@" >&2
+   echo_usage
+   exit 3
+ fi
