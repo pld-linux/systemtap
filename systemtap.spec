@@ -33,6 +33,7 @@ Patch0:		%{name}-dyninst.patch
 Patch1:		%{name}-systemd.patch
 Patch2:		%{name}-staprun-version-flush.patch
 Patch3:		%{name}-onboot-slog.patch
+Patch4:		%{name}-types.patch
 URL:		https://sourceware.org/systemtap/
 BuildRequires:	autoconf >= 2.71
 BuildRequires:	automake
@@ -324,10 +325,11 @@ Przewodniki i dokumentacja wprowadzająca do SystemTap.
 
 %prep
 %setup -q
-%patch -P 0 -p1
-%patch -P 1 -p1
-%patch -P 2 -p1
-%patch -P 3 -p1
+%patch -P0 -p1
+%patch -P1 -p1
+%patch -P2 -p1
+%patch -P3 -p1
+%patch -P4 -p1
 
 %{__sed} -E -i -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
 	testsuite/systemtap.examples/general/pyexample.py
